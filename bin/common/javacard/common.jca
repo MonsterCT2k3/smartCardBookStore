@@ -1,0 +1,72 @@
+// converted by version  [v3.0.4]
+// on Sun Nov 30 21:55:09 ICT 2025
+
+.package common {
+	.aid 0x11:0x22:0x33:0x44:0x55:0x0;
+	.version 1.0;
+
+	.imports {
+		0xA0:0x0:0x0:0x0:0x62:0x0:0x1 1.0;		//java/lang
+	}
+
+	.constantPool {
+		// 0
+		staticMethodRef 0.0.0()V;		// java/lang/Object.<init>()V
+	}
+
+	.class public Constants 0 extends 0.0 {		// extends java/lang/Object
+
+		.fields {
+			public static final byte CLA_BOOKSTORE = 0;		// B
+			public static final byte INS_SETUP_CARD = 16;		// B
+			public static final byte INS_INIT_DATA = 21;		// B
+			public static final byte INS_VERIFY_PIN = 32;		// B
+			public static final byte INS_GET_PUBLIC_KEY = 34;		// B
+			public static final byte INS_CHANGE_PIN = 37;		// B
+			public static final byte INS_GET_INFO = 48;		// B
+			public static final byte INS_AUTH_GET_CARD_ID = 49;		// B
+			public static final byte INS_UPDATE_INFO = 64;		// B
+			public static final byte INS_RESET_USER_KEY = 80;		// B
+			public static final byte INS_SET_APP_KEY = 36;		// B
+			public static final short SW_VERIFICATION_FAILED = 25344;		// S
+			public static final short SW_CARD_LOCKED = 27011;		// S
+			public static final short DATA_SIZE = 2048;		// S
+			public static final short OFF_CARD_ID = 0;		// S
+			public static final short LEN_CARD_ID = 16;		// S
+			public static final short OFF_FULLNAME = 16;		// S
+			public static final short LEN_FULLNAME = 64;		// S
+			public static final short OFF_DOB = 80;		// S
+			public static final short LEN_DOB = 16;		// S
+			public static final short OFF_PHONE = 96;		// S
+			public static final short LEN_PHONE = 16;		// S
+			public static final short OFF_REG_DATE = 112;		// S
+			public static final short LEN_REG_DATE = 16;		// S
+			public static final short OFF_POINTS = 128;		// S
+			public static final short LEN_POINTS = 16;		// S
+			public static final short OFF_IMAGE = 144;		// S
+			public static final short LEN_IMAGE = 1024;		// S
+			public static final short OFF_APP_PUBLIC_KEY = 1168;		// S
+			public static final short LEN_APP_PUBLIC_KEY = 128;		// S
+			public static final short PBKDF2_ITERATIONS = 500;		// S
+			public static final byte PIN_MAX_TRIES = 3;		// B
+		}
+
+		.publicMethodTable 1 {
+			equals(Ljava/lang/Object;)Z;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.method public <init>()V 0 {
+			.stack 1;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 0;		// java/lang/Object.<init>()V
+					return;
+		}
+
+	}
+
+}

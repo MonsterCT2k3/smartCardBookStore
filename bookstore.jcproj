@@ -1,0 +1,18 @@
+<JavaCardProject name="bookstore">
+<USER>
+<PKG name="common" aid="11 22 33 44 55 00" major="1" minor="0">
+<CLASS name="Constants"/>
+</PKG>
+<PKG name="crypto" aid="11 22 33 44 55 01" major="1" minor="0">
+<CLASS name="Pbkdf2HmacSha256"/>
+<CLASS name="SecurityManager"/>
+</PKG>
+<PKG name="storage" aid="11 22 33 44 55 02" major="1" minor="0">
+<CLASS name="DataRepository"/>
+</PKG>
+<PKG name="applet" aid="11 22 33 44 55 03" major="1" minor="0">
+<APPLET aid="11 22 33 44 55 03 00" instanceaid="" parameter="" authority="" privileges="" index="-10600" name="MainApplet"/>
+</PKG>
+<Libs/>
+</USER>
+</JavaCardProject>

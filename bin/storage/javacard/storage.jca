@@ -1,0 +1,246 @@
+// converted by version  [v3.0.4]
+// on Sun Nov 30 10:42:59 ICT 2025
+
+.package storage {
+	.aid 0x11:0x22:0x33:0x44:0x55:0x2;
+	.version 1.0;
+
+	.imports {
+		0xA0:0x0:0x0:0x0:0x62:0x0:0x1 1.0;		//java/lang
+		0xA0:0x0:0x0:0x0:0x62:0x2:0x1 1.5;		//javacardx/crypto
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x1 1.5;		//javacard/framework
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x2 1.5;		//javacard/security
+	}
+
+	.constantPool {
+		// 0
+		instanceFieldRef byte[] DataRepository/dataBlob;
+		// 1
+		instanceFieldRef 1.1 DataRepository/aesCipher;
+		// 2
+		instanceFieldRef byte[] DataRepository/ivBuffer;
+		// 3
+		instanceFieldRef byte[] DataRepository/tempBlock;
+		// 4
+		staticMethodRef 2.8.13(SB)[B;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+		// 5
+		staticMethodRef 1.1.0(BZ)Ljavacardx/crypto/Cipher;;		// javacardx/crypto/Cipher.getInstance(BZ)Ljavacardx/crypto/Cipher;
+			.descriptor	Ljavacardx/crypto/Cipher;	1.1;
+
+		// 6
+		staticMethodRef 0.0.0()V;		// java/lang/Object.<init>()V
+		// 7
+		staticMethodRef 2.16.3([BSSB)S;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+		// 8
+		.classRef 0.2;		// java/lang/Exception
+		// 9
+		staticMethodRef 2.8.1()V;		// javacard/framework/JCSystem.beginTransaction()V
+		// 10
+		staticMethodRef DataRepository/generateIv(S)V;
+		// 11
+		virtualMethodRef 1.1.4(Ljavacard/security/Key;B[BSS)V;		// init(Ljavacard/security/Key;B[BSS)V
+			.descriptor	Ljavacard/security/Key;	3.0;
+
+		// 12
+		virtualMethodRef 1.1.1([BSS[BS)S;		// doFinal([BSS[BS)S
+		// 13
+		virtualMethodRef 1.1.5([BSS[BS)S;		// update([BSS[BS)S
+		// 14
+		staticMethodRef 2.16.1([BS[BSS)S;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+		// 15
+		staticMethodRef 2.8.2()V;		// javacard/framework/JCSystem.commitTransaction()V
+		// 16
+		staticMethodRef 2.8.0()V;		// javacard/framework/JCSystem.abortTransaction()V
+		// 17
+		staticMethodRef 2.7.1(S)V;		// javacard/framework/ISOException.throwIt(S)V
+	}
+
+	.class public DataRepository 0 extends 0.0 {		// extends java/lang/Object
+
+		.fields {
+			private byte[] dataBlob 0;		// [B
+			private 1.1 aesCipher 1;		// Ljavacardx/crypto/Cipher;
+			private byte[] ivBuffer 2;		// [B
+			private byte[] tempBlock 3;		// [B
+		}
+
+		.publicMethodTable 1 {
+			equals(Ljava/lang/Object;)Z;
+			write(S[BSSLjavacard/security/AESKey;)V;
+			read(SS[BSLjavacard/security/AESKey;)V;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.method public <init>()V 0 {
+			.stack 3;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 6;		// java/lang/Object.<init>()V
+					aload_0;
+					sspush 2048;
+					newarray 11;
+					putfield_a 0;		// reference storage/DataRepository.dataBlob
+					aload_0;
+					bspush 13;
+					sconst_0;
+					invokestatic 5;		// javacardx/crypto/Cipher.getInstance(BZ)Ljavacardx/crypto/Cipher;
+					putfield_a 1;		// reference storage/DataRepository.aesCipher
+					aload_0;
+					bspush 16;
+					sconst_1;
+					invokestatic 4;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+					putfield_a 2;		// reference storage/DataRepository.ivBuffer
+					aload_0;
+					bspush 16;
+					sconst_1;
+					invokestatic 4;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+					putfield_a 3;		// reference storage/DataRepository.tempBlock
+					return;
+		}
+
+		.method private generateIv(S)V {
+			.stack 4;
+			.locals 0;
+
+				L0:	getfield_a_this 2;		// reference storage/DataRepository.ivBuffer
+					sconst_0;
+					bspush 16;
+					sconst_0;
+					invokestatic 7;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					getfield_a_this 2;		// reference storage/DataRepository.ivBuffer
+					bspush 14;
+					sload_1;
+					bspush 8;
+					sshr;
+					s2b;
+					bastore;
+					getfield_a_this 2;		// reference storage/DataRepository.ivBuffer
+					bspush 15;
+					sload_1;
+					sspush 255;
+					sand;
+					s2b;
+					bastore;
+					return;
+		}
+
+		.method public write(S[BSSLjavacard/security/AESKey;)V 1 {
+			.stack 7;
+			.locals 2;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	invokestatic 9;		// javacard/framework/JCSystem.beginTransaction()V
+				L1:	aload_0;
+					sload_1;
+					invokespecial 10;		// storage/DataRepository.generateIv(S)V
+					getfield_a_this 1;		// reference storage/DataRepository.aesCipher
+					aload 5;
+					sconst_2;
+					getfield_a_this 2;		// reference storage/DataRepository.ivBuffer
+					sconst_0;
+					bspush 16;
+					invokevirtual 11;		// init(Ljavacard/security/Key;B[BSS)V
+					sload 4;
+					bspush 16;
+					srem;
+					sstore 6;
+				L2:	sload 4;
+					sload 6;
+					ssub;
+					sstore 7;
+				L3:	sload 6;
+					ifne L5;
+				L4:	getfield_a_this 1;		// reference storage/DataRepository.aesCipher
+					aload_2;
+					sload_3;
+					sload 4;
+					getfield_a_this 0;		// reference storage/DataRepository.dataBlob
+					sload_1;
+					invokevirtual 12;		// doFinal([BSS[BS)S
+					pop;
+					goto L8;
+				L5:	sload 7;
+					ifle L7;
+				L6:	getfield_a_this 1;		// reference storage/DataRepository.aesCipher
+					aload_2;
+					sload_3;
+					sload 7;
+					getfield_a_this 0;		// reference storage/DataRepository.dataBlob
+					sload_1;
+					invokevirtual 13;		// update([BSS[BS)S
+					pop;
+				L7:	aload_2;
+					sload_3;
+					sload 7;
+					sadd;
+					getfield_a_this 3;		// reference storage/DataRepository.tempBlock
+					sconst_0;
+					sload 6;
+					invokestatic 14;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					pop;
+					getfield_a_this 3;		// reference storage/DataRepository.tempBlock
+					sload 6;
+					bspush 16;
+					sload 6;
+					ssub;
+					sconst_0;
+					invokestatic 7;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					getfield_a_this 1;		// reference storage/DataRepository.aesCipher
+					getfield_a_this 3;		// reference storage/DataRepository.tempBlock
+					sconst_0;
+					bspush 16;
+					getfield_a_this 0;		// reference storage/DataRepository.dataBlob
+					sload_1;
+					sload 7;
+					sadd;
+					invokevirtual 12;		// doFinal([BSS[BS)S
+					pop;
+				L8:	invokestatic 15;		// javacard/framework/JCSystem.commitTransaction()V
+				L9:	goto L12;
+				L10:	astore 6;
+				L11:	invokestatic 16;		// javacard/framework/JCSystem.abortTransaction()V
+					sspush 28416;
+					invokestatic 17;		// javacard/framework/ISOException.throwIt(S)V
+				L12:	return;
+			.exceptionTable {
+				// start_block end_block handler_block catch_type_index
+				L1 L9 L10 8;
+			}
+		}
+
+		.method public read(SS[BSLjavacard/security/AESKey;)V 2 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					sload_1;
+					invokespecial 10;		// storage/DataRepository.generateIv(S)V
+					getfield_a_this 1;		// reference storage/DataRepository.aesCipher
+					aload 5;
+					sconst_1;
+					getfield_a_this 2;		// reference storage/DataRepository.ivBuffer
+					sconst_0;
+					bspush 16;
+					invokevirtual 11;		// init(Ljavacard/security/Key;B[BSS)V
+					getfield_a_this 1;		// reference storage/DataRepository.aesCipher
+					getfield_a_this 0;		// reference storage/DataRepository.dataBlob
+					sload_1;
+					sload_2;
+					aload_3;
+					sload 4;
+					invokevirtual 12;		// doFinal([BSS[BS)S
+					pop;
+					return;
+		}
+
+	}
+
+}
