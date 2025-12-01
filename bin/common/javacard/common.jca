@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Mon Dec 01 09:33:00 ICT 2025
+// on Mon Dec 01 14:49:13 ICT 2025
 
 .package common {
 	.aid 0x11:0x22:0x33:0x44:0x55:0x0;
@@ -26,6 +26,7 @@
 			public static final byte INS_GET_INFO = 48;		// B
 			public static final byte INS_AUTH_GET_CARD_ID = 49;		// B
 			public static final byte INS_AUTH_CHALLENGE = 50;		// B
+			public static final byte INS_GET_PIN_TRIES = 51;		// B
 			public static final byte INS_UNBLOCK_PIN = 38;		// B
 			public static final byte INS_UPDATE_INFO = 64;		// B
 			public static final byte INS_RESET_USER_KEY = 80;		// B

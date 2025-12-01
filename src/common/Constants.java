@@ -13,6 +13,7 @@ public class Constants {
     public static final byte INS_GET_INFO = (byte) 0x30;
     public static final byte INS_AUTH_GET_CARD_ID = (byte) 0x31; // Auth Step 1
     public static final byte INS_AUTH_CHALLENGE = (byte) 0x32; // Auth Step 2: Challenge-Response
+    public static final byte INS_GET_PIN_TRIES = (byte) 0x33; // Get PIN Tries (Hybrid)
     public static final byte INS_UNBLOCK_PIN = (byte) 0x26; // NEW: Unblock PIN
     public static final byte INS_UPDATE_INFO = (byte) 0x40;
     public static final byte INS_RESET_USER_KEY = (byte) 0x50;
@@ -29,7 +30,7 @@ public class Constants {
     // 1. Card ID (16 bytes)
     public static final short OFF_CARD_ID = (short) 0;
     public static final short LEN_CARD_ID = (short) 16;
-
+    
     // 2. Ho ten (64 bytes)
     public static final short OFF_FULLNAME = (short) 16;
     public static final short LEN_FULLNAME = (short) 64;
@@ -37,11 +38,11 @@ public class Constants {
     // 3. Ngay sinh (16 bytes - DDMMYYYY + Padding) - NEW
     public static final short OFF_DOB = (short) 80;
     public static final short LEN_DOB = (short) 16;
-
+    
     // 4. So dien thoai (16 bytes) - Doi cho
     public static final short OFF_PHONE = (short) 96;
     public static final short LEN_PHONE = (short) 16;
-
+    
     // 5. Ngay dang ky (16 bytes - DDMMYYYY + Padding) - NEW
     public static final short OFF_REG_DATE = (short) 112;
     public static final short LEN_REG_DATE = (short) 16;

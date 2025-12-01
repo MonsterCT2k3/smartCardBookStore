@@ -31,10 +31,11 @@ public class MainApplet extends Applet implements ExtendedLength {
 
         // Kiem tra xem the co bi khoa cung khong
         // CHO PHEP LENH UNBLOCK, RESET PIN, va GET PUBLIC KEY CHAY KHI KHOA
-        if (secManager.isCardBlocked() 
-                && ins != Constants.INS_UNBLOCK_PIN 
+        if (secManager.isCardBlocked()
+                && ins != Constants.INS_UNBLOCK_PIN
                 && ins != Constants.INS_RESET_USER_KEY
-                && ins != Constants.INS_GET_PUBLIC_KEY) {
+                && ins != Constants.INS_GET_PUBLIC_KEY
+                && ins != Constants.INS_GET_PIN_TRIES) {
             ISOException.throwIt(Constants.SW_CARD_LOCKED);
         }
 
@@ -92,6 +93,10 @@ public class MainApplet extends Applet implements ExtendedLength {
 
             case Constants.INS_AUTH_CHALLENGE:
                 handleAuthChallenge(apdu);
+                break;
+
+            case Constants.INS_GET_PIN_TRIES:
+                handleGetPinTries(apdu);
                 break;
 
             case Constants.INS_UPDATE_INFO:
@@ -216,6 +221,19 @@ public class MainApplet extends Applet implements ExtendedLength {
 
         // 2. Gui chu ky ve cho Client
         apdu.setOutgoingAndSend((short) 0, sigLen);
+    }
+
+    private void handleGetPinTries(APDU apdu) {
+        byte[] buffer = apdu.getBuffer();
+
+        // 1. Lay Pin Tries
+        byte tries = secManager.getPinTries();
+
+        // 2. Ghi vao buffer
+        buffer[0] = tries;
+
+        // 3. Gui 1 byte (Plaintext)
+        apdu.setOutgoingAndSend((short) 0, (short) 1);
     }
 
     private void handleGetInfoSecure(APDU apdu) {

@@ -24,6 +24,7 @@ public class BookstoreClientTest {
     private static final byte INS_AUTH_CHALLENGE = (byte) 0x32; // Auth Step 2: Challenge-Response
     private static final byte INS_CHANGE_PIN = (byte) 0x25; // Change PIN
     private static final byte INS_UNBLOCK_PIN = (byte) 0x26; // Unblock PIN
+    private static final byte INS_GET_PIN_TRIES = (byte) 0x33; // Get PIN Tries
     private static final byte INS_RESET_PIN = (byte) 0x50;
     private static final byte INS_GET_INFO = (byte) 0x30;
 
@@ -65,6 +66,7 @@ public class BookstoreClientTest {
             System.out.println("8. Change PIN (User)");
             System.out.println("9. Authenticate Card (Challenge-Response)");
             System.out.println("10. Unblock Card (Admin Only)");
+            System.out.println("11. Get PIN Tries");
             System.out.println("0. Exit");
             System.out.print("Choose option: ");
 
@@ -101,6 +103,9 @@ public class BookstoreClientTest {
                         break;
                     case "10":
                         unblockCard();
+                        break;
+                    case "11":
+                        getPinTries();
                         break;
                     case "0":
                         System.out.println("Exiting...");
@@ -552,5 +557,41 @@ public class BookstoreClientTest {
                     + Character.digit(s.charAt(i + 1), 16));
         }
         return data;
+    }
+
+    private static void getPinTries() {
+        try {
+            if (channel == null) {
+                System.out.println("Card not connected!");
+                return;
+            }
+
+            System.out.println("Getting PIN Tries...");
+            ResponseAPDU response = channel.transmit(new CommandAPDU(0x00, INS_GET_PIN_TRIES, 0x00, 0x00));
+
+            if (response.getSW() != 0x9000) {
+                System.out.println("Failed to get PIN Tries. SW: " + String.format("%04X", response.getSW()));
+                return;
+            }
+
+            byte[] data = response.getData();
+            if (data.length < 1) {
+                System.out.println("Error: Empty response data");
+                return;
+            }
+
+            // Lay byte dau tien
+            byte tries = data[0];
+            System.out.println("PIN Tries: " + tries);
+
+            if (tries >= 3) {
+                System.out.println(">>> CARD IS BLOCKED!");
+            } else {
+                System.out.println(">>> Remaining attempts: " + (3 - tries));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

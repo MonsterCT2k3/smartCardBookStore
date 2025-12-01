@@ -501,4 +501,8 @@ public class SecurityManager {
     public boolean isCardBlocked() {
         return pinTries >= Constants.PIN_MAX_TRIES;
     }
+
+    public byte getPinTries() {
+        return pinTries;
+    }
 }

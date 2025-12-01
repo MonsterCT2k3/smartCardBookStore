@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Mon Dec 01 09:33:01 ICT 2025
+// on Mon Dec 01 14:49:14 ICT 2025
 
 .package crypto {
 	.aid 0x11:0x22:0x33:0x44:0x55:0x1;
@@ -435,6 +435,7 @@
 			loadAppPublicKey([BS)V;
 			getMasterKey()Ljavacard/security/AESKey;;
 			isCardBlocked()Z;
+			getPinTries()B;
 		}
 
 		.packageMethodTable 0 {
@@ -1433,6 +1434,14 @@
 					goto L3;
 				L2:	sconst_0;
 				L3:	sreturn;
+		}
+
+		.method public getPinTries()B 15 {
+			.stack 1;
+			.locals 0;
+
+				L0:	getfield_b_this 26;		// byte crypto/SecurityManager.pinTries
+					sreturn;
 		}
 
 	}
