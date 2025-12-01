@@ -30,8 +30,11 @@ public class MainApplet extends Applet implements ExtendedLength {
         byte ins = buffer[ISO7816.OFFSET_INS];
 
         // Kiem tra xem the co bi khoa cung khong
-        // CHO PHEP LENH UNBLOCK (0x26) va RESET PIN (0x50) CHAY KHI KHOA
-        if (secManager.isCardBlocked() && ins != Constants.INS_UNBLOCK_PIN && ins != Constants.INS_RESET_USER_KEY) {
+        // CHO PHEP LENH UNBLOCK, RESET PIN, va GET PUBLIC KEY CHAY KHI KHOA
+        if (secManager.isCardBlocked() 
+                && ins != Constants.INS_UNBLOCK_PIN 
+                && ins != Constants.INS_RESET_USER_KEY
+                && ins != Constants.INS_GET_PUBLIC_KEY) {
             ISOException.throwIt(Constants.SW_CARD_LOCKED);
         }
 

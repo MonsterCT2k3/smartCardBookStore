@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Mon Dec 01 09:33:02 ICT 2025
+// on Mon Dec 01 11:52:26 ICT 2025
 
 .package applet {
 	.aid 0x11:0x22:0x33:0x44:0x55:0x3;
@@ -205,84 +205,87 @@
 					sstore_3;
 				L4:	getfield_a_this 0;		// reference applet/MainApplet.secManager
 					invokevirtual 12;		// isCardBlocked()Z
-					ifeq L8;
+					ifeq L9;
 				L5:	sload_3;
 					bspush 38;
-					if_scmpeq L8;
+					if_scmpeq L9;
 				L6:	sload_3;
 					bspush 80;
-					if_scmpeq L8;
-				L7:	sspush 27011;
+					if_scmpeq L9;
+				L7:	sload_3;
+					bspush 34;
+					if_scmpeq L9;
+				L8:	sspush 27011;
 					invokestatic 13;		// javacard/framework/ISOException.throwIt(S)V
-				L8:	sload_3;
-					slookupswitch L25 12 16 L9 21 L24 32 L18 34 L13 36 L16 37 L10 38 L11 48 L20 49 L21 50 L22 64 L23 80 L12;
-				L9:	aload_0;
-					aload_1;
-					invokespecial 14;		// applet/MainApplet.handleSetup(Ljavacard/framework/APDU;)V
-					goto L26;
+				L9:	sload_3;
+					slookupswitch L26 12 16 L10 21 L25 32 L19 34 L14 36 L17 37 L11 38 L12 48 L21 49 L22 50 L23 64 L24 80 L13;
 				L10:	aload_0;
 					aload_1;
-					invokespecial 15;		// applet/MainApplet.handleChangePin(Ljavacard/framework/APDU;)V
-					goto L26;
+					invokespecial 14;		// applet/MainApplet.handleSetup(Ljavacard/framework/APDU;)V
+					goto L27;
 				L11:	aload_0;
 					aload_1;
-					invokespecial 16;		// applet/MainApplet.handleUnblockPin(Ljavacard/framework/APDU;)V
-					goto L26;
+					invokespecial 15;		// applet/MainApplet.handleChangePin(Ljavacard/framework/APDU;)V
+					goto L27;
 				L12:	aload_0;
 					aload_1;
+					invokespecial 16;		// applet/MainApplet.handleUnblockPin(Ljavacard/framework/APDU;)V
+					goto L27;
+				L13:	aload_0;
+					aload_1;
 					invokespecial 17;		// applet/MainApplet.handleResetUserKey(Ljavacard/framework/APDU;)V
-					goto L26;
-				L13:	getfield_a_this 0;		// reference applet/MainApplet.secManager
+					goto L27;
+				L14:	getfield_a_this 0;		// reference applet/MainApplet.secManager
 					invokevirtual 18;		// getCardPublicKey()Ljavacard/security/RSAPublicKey;
 					astore 4;
-				L14:	aload 4;
+				L15:	aload 4;
 					aload_2;
 					sconst_0;
 					invokeinterface 3 19 5;		// javacard/security/RSAPublicKey
 					sstore 5;
-				L15:	aload_1;
+				L16:	aload_1;
 					sconst_0;
 					sload 5;
 					invokevirtual 20;		// setOutgoingAndSend(SS)V
-					goto L26;
-				L16:	aload_1;
+					goto L27;
+				L17:	aload_1;
 					invokevirtual 21;		// setIncomingAndReceive()S
 					sstore 6;
-				L17:	getfield_a_this 0;		// reference applet/MainApplet.secManager
+				L18:	getfield_a_this 0;		// reference applet/MainApplet.secManager
 					aload_2;
 					sconst_5;
 					sload 6;
 					invokevirtual 22;		// setAppPublicKey([BSS)V
-					goto L26;
-				L18:	aload_1;
+					goto L27;
+				L19:	aload_1;
 					invokevirtual 21;		// setIncomingAndReceive()S
 					sstore 7;
-				L19:	getfield_a_this 0;		// reference applet/MainApplet.secManager
+				L20:	getfield_a_this 0;		// reference applet/MainApplet.secManager
 					aload_2;
 					sconst_5;
 					sload 7;
 					invokevirtual 23;		// verifyPinHybrid([BSS)V
-					goto L26;
-				L20:	aload_0;
-					aload_1;
-					invokespecial 24;		// applet/MainApplet.handleGetInfoSecure(Ljavacard/framework/APDU;)V
-					goto L26;
+					goto L27;
 				L21:	aload_0;
 					aload_1;
-					invokespecial 25;		// applet/MainApplet.handleAuthGetCardId(Ljavacard/framework/APDU;)V
-					goto L26;
+					invokespecial 24;		// applet/MainApplet.handleGetInfoSecure(Ljavacard/framework/APDU;)V
+					goto L27;
 				L22:	aload_0;
 					aload_1;
+					invokespecial 25;		// applet/MainApplet.handleAuthGetCardId(Ljavacard/framework/APDU;)V
+					goto L27;
+				L23:	aload_0;
+					aload_1;
 					invokespecial 26;		// applet/MainApplet.handleAuthChallenge(Ljavacard/framework/APDU;)V
-					goto L26;
-				L23:	goto L26;
-				L24:	aload_0;
+					goto L27;
+				L24:	goto L27;
+				L25:	aload_0;
 					aload_1;
 					invokespecial 27;		// applet/MainApplet.handleInitData(Ljavacard/framework/APDU;)V
-					goto L26;
-				L25:	sspush 27904;
+					goto L27;
+				L26:	sspush 27904;
 					invokestatic 13;		// javacard/framework/ISOException.throwIt(S)V
-				L26:	return;
+				L27:	return;
 		}
 
 		.method private handleSetup(Ljavacard/framework/APDU;)V {
