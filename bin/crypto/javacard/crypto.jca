@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Sun Nov 30 21:37:37 ICT 2025
+// on Mon Dec 01 09:33:01 ICT 2025
 
 .package crypto {
 	.aid 0x11:0x22:0x33:0x44:0x55:0x1;
@@ -56,17 +56,17 @@
 		// 20
 		instanceFieldRef 3.1 SecurityManager/rsaCipher;
 		// 21
-		instanceFieldRef 1.14 SecurityManager/random;
+		instanceFieldRef 1.15 SecurityManager/rsaSignature;
 		// 22
-		instanceFieldRef byte[] SecurityManager/scratch;
+		instanceFieldRef 1.14 SecurityManager/random;
 		// 23
-		instanceFieldRef byte[] SecurityManager/zeroIV;
+		instanceFieldRef byte[] SecurityManager/scratch;
 		// 24
-		instanceFieldRef boolean SecurityManager/isUnlocked;
+		instanceFieldRef byte[] SecurityManager/zeroIV;
 		// 25
-		instanceFieldRef byte SecurityManager/pinTries;
+		instanceFieldRef boolean SecurityManager/isUnlocked;
 		// 26
-		virtualMethodRef 1.11.1([BSS[BS)S;		// doFinal([BSS[BS)S
+		instanceFieldRef byte SecurityManager/pinTries;
 		// 27
 		staticMethodRef 2.16.2([BS[BSS)S;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
 		// 28
@@ -96,58 +96,72 @@
 		// 37
 		staticMethodRef 0.0.0()V;		// java/lang/Object.<init>()V
 		// 38
-		staticMethodRef 1.14.0(B)Ljavacard/security/RandomData;;		// javacard/security/RandomData.getInstance(B)Ljavacard/security/RandomData;
-			.descriptor	Ljavacard/security/RandomData;	1.14;
+		staticMethodRef 1.15.0(BZ)Ljavacard/security/Signature;;		// javacard/security/Signature.getInstance(BZ)Ljavacard/security/Signature;
+			.descriptor	Ljavacard/security/Signature;	1.15;
 
 		// 39
 		virtualMethodRef 1.16.1()V;		// genKeyPair()V
 		// 40
-		.classRef 1.9;		// javacard/security/RSAPublicKey
+		staticMethodRef 1.14.0(B)Ljavacard/security/RandomData;;		// javacard/security/RandomData.getInstance(B)Ljavacard/security/RandomData;
+			.descriptor	Ljavacard/security/RandomData;	1.14;
+
 		// 41
-		staticMethodRef 2.16.3([BSSB)S;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+		.classRef 1.9;		// javacard/security/RSAPublicKey
 		// 42
-		virtualMethodRef 1.11.4()V;		// reset()V
+		staticMethodRef 2.16.3([BSSB)S;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 		// 43
-		virtualMethodRef 1.11.5([BSS)V;		// update([BSS)V
+		virtualMethodRef 1.11.4()V;		// reset()V
 		// 44
-		virtualMethodRef 1.16.2()Ljavacard/security/PrivateKey;;		// getPrivate()Ljavacard/security/PrivateKey;
-			.descriptor	Ljavacard/security/PrivateKey;	1.2;
-
+		virtualMethodRef 1.11.5([BSS)V;		// update([BSS)V
 		// 45
-		virtualMethodRef 3.1.3(Ljavacard/security/Key;B)V;		// init(Ljavacard/security/Key;B)V
-			.descriptor	Ljavacard/security/Key;	1.0;
-
+		virtualMethodRef 1.11.1([BSS[BS)S;		// doFinal([BSS[BS)S
 		// 46
-		virtualMethodRef 3.1.1([BSS[BS)S;		// doFinal([BSS[BS)S
+		virtualMethodRef Pbkdf2HmacSha256/derive([BSS[BSSS[BS)V;
 		// 47
 		virtualMethodRef 3.1.4(Ljavacard/security/Key;B[BSS)V;		// init(Ljavacard/security/Key;B[BSS)V
 			.descriptor	Ljavacard/security/Key;	1.0;
 
 		// 48
-		.classRef 0.2;		// java/lang/Exception
+		virtualMethodRef 3.1.1([BSS[BS)S;		// doFinal([BSS[BS)S
 		// 49
-		virtualMethodRef SecurityManager/decryptIncomingData([BSS)S;
-		// 50
-		staticMethodRef 2.7.1(S)V;		// javacard/framework/ISOException.throwIt(S)V
-		// 51
-		staticMethodRef 2.8.1()V;		// javacard/framework/JCSystem.beginTransaction()V
-		// 52
-		virtualMethodRef 1.14.1([BSS)V;		// generateData([BSS)V
-		// 53
-		virtualMethodRef Pbkdf2HmacSha256/derive([BSS[BSSS[BS)V;
-		// 54
-		staticMethodRef 2.8.2()V;		// javacard/framework/JCSystem.commitTransaction()V
-		// 55
-		staticMethodRef 2.8.0()V;		// javacard/framework/JCSystem.abortTransaction()V
-		// 56
 		staticMethodRef 2.16.0([BS[BSS)B;		// javacard/framework/Util.arrayCompare([BS[BSS)B
+		// 50
+		virtualMethodRef SecurityManager/decryptIncomingData([BSS)S;
+		// 51
+		staticMethodRef 2.7.1(S)V;		// javacard/framework/ISOException.throwIt(S)V
+		// 52
+		staticMethodRef SecurityManager/checkAdminPin([BS)Z;
+		// 53
+		virtualMethodRef 1.16.2()Ljavacard/security/PrivateKey;;		// getPrivate()Ljavacard/security/PrivateKey;
+			.descriptor	Ljavacard/security/PrivateKey;	1.2;
+
+		// 54
+		virtualMethodRef 3.1.3(Ljavacard/security/Key;B)V;		// init(Ljavacard/security/Key;B)V
+			.descriptor	Ljavacard/security/Key;	1.0;
+
+		// 55
+		.classRef 0.2;		// java/lang/Exception
+		// 56
+		staticMethodRef 2.8.1()V;		// javacard/framework/JCSystem.beginTransaction()V
 		// 57
-		staticMethodRef SecurityManager/verifyPinInternal([BSS)V;
+		virtualMethodRef 1.14.1([BSS)V;		// generateData([BSS)V
 		// 58
-		virtualMethodRef SecurityManager/resetUserKey([BS)V;
+		staticMethodRef 2.8.2()V;		// javacard/framework/JCSystem.commitTransaction()V
 		// 59
-		staticMethodRef SecurityManager/changePin([BS)V;
+		staticMethodRef 2.8.0()V;		// javacard/framework/JCSystem.abortTransaction()V
 		// 60
+		staticMethodRef SecurityManager/verifyPinInternal([BSS)V;
+		// 61
+		virtualMethodRef SecurityManager/resetUserKey([BS)V;
+		// 62
+		staticMethodRef SecurityManager/changePin([BS)V;
+		// 63
+		virtualMethodRef 1.15.3(Ljavacard/security/Key;B)V;		// init(Ljavacard/security/Key;B)V
+			.descriptor	Ljavacard/security/Key;	1.0;
+
+		// 64
+		virtualMethodRef 1.15.5([BSS[BS)S;		// sign([BSS[BS)S
+		// 65
 		virtualMethodRef 1.16.3()Ljavacard/security/PublicKey;;		// getPublic()Ljavacard/security/PublicKey;
 			.descriptor	Ljavacard/security/PublicKey;	1.3;
 
@@ -221,13 +235,13 @@
 					sconst_0;
 					bspush 64;
 					bspush 54;
-					invokestatic 41;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 42;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					getfield_a_this 2;		// reference crypto/Pbkdf2HmacSha256.k_opad
 					sconst_0;
 					bspush 64;
 					bspush 92;
-					invokestatic 41;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 42;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					sconst_0;
 					sstore 10;
@@ -257,17 +271,17 @@
 				L4:	sinc 10 1;
 					goto L1;
 				L5:	getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
-					invokevirtual 42;		// reset()V
+					invokevirtual 43;		// reset()V
 					getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
 					getfield_a_this 1;		// reference crypto/Pbkdf2HmacSha256.k_ipad
 					sconst_0;
 					bspush 64;
-					invokevirtual 43;		// update([BSS)V
+					invokevirtual 44;		// update([BSS)V
 					getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
 					aload 4;
 					sload 5;
 					sload 6;
-					invokevirtual 43;		// update([BSS)V
+					invokevirtual 44;		// update([BSS)V
 					getfield_a_this 5;		// reference crypto/Pbkdf2HmacSha256.scratch
 					sconst_0;
 					sconst_0;
@@ -290,22 +304,22 @@
 					sconst_4;
 					getfield_a_this 3;		// reference crypto/Pbkdf2HmacSha256.u_last
 					sconst_0;
-					invokevirtual 26;		// doFinal([BSS[BS)S
+					invokevirtual 45;		// doFinal([BSS[BS)S
 					pop;
 					getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
-					invokevirtual 42;		// reset()V
+					invokevirtual 43;		// reset()V
 					getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
 					getfield_a_this 2;		// reference crypto/Pbkdf2HmacSha256.k_opad
 					sconst_0;
 					bspush 64;
-					invokevirtual 43;		// update([BSS)V
+					invokevirtual 44;		// update([BSS)V
 					getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
 					getfield_a_this 3;		// reference crypto/Pbkdf2HmacSha256.u_last
 					sconst_0;
 					bspush 32;
 					getfield_a_this 3;		// reference crypto/Pbkdf2HmacSha256.u_last
 					sconst_0;
-					invokevirtual 26;		// doFinal([BSS[BS)S
+					invokevirtual 45;		// doFinal([BSS[BS)S
 					pop;
 					getfield_a_this 3;		// reference crypto/Pbkdf2HmacSha256.u_last
 					sconst_0;
@@ -320,34 +334,34 @@
 					sload 7;
 					if_scmpge L11;
 				L7:	getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
-					invokevirtual 42;		// reset()V
+					invokevirtual 43;		// reset()V
 					getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
 					getfield_a_this 1;		// reference crypto/Pbkdf2HmacSha256.k_ipad
 					sconst_0;
 					bspush 64;
-					invokevirtual 43;		// update([BSS)V
+					invokevirtual 44;		// update([BSS)V
 					getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
 					getfield_a_this 3;		// reference crypto/Pbkdf2HmacSha256.u_last
 					sconst_0;
 					bspush 32;
 					getfield_a_this 5;		// reference crypto/Pbkdf2HmacSha256.scratch
 					sconst_0;
-					invokevirtual 26;		// doFinal([BSS[BS)S
+					invokevirtual 45;		// doFinal([BSS[BS)S
 					pop;
 					getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
-					invokevirtual 42;		// reset()V
+					invokevirtual 43;		// reset()V
 					getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
 					getfield_a_this 2;		// reference crypto/Pbkdf2HmacSha256.k_opad
 					sconst_0;
 					bspush 64;
-					invokevirtual 43;		// update([BSS)V
+					invokevirtual 44;		// update([BSS)V
 					getfield_a_this 0;		// reference crypto/Pbkdf2HmacSha256.sha256
 					getfield_a_this 5;		// reference crypto/Pbkdf2HmacSha256.scratch
 					sconst_0;
 					bspush 32;
 					getfield_a_this 3;		// reference crypto/Pbkdf2HmacSha256.u_last
 					sconst_0;
-					invokevirtual 26;		// doFinal([BSS[BS)S
+					invokevirtual 45;		// doFinal([BSS[BS)S
 					pop;
 					sconst_0;
 					sstore 11;
@@ -397,21 +411,24 @@
 			private 1.11 sha256 12;		// Ljavacard/security/MessageDigest;
 			private 3.1 aesCipher 13;		// Ljavacardx/crypto/Cipher;
 			private 3.1 rsaCipher 14;		// Ljavacardx/crypto/Cipher;
-			private 1.14 random 15;		// Ljavacard/security/RandomData;
-			private byte[] scratch 16;		// [B
-			private byte[] zeroIV 17;		// [B
-			private boolean isUnlocked 18;		// Z
-			private byte pinTries 19;		// B
+			private 1.15 rsaSignature 15;		// Ljavacard/security/Signature;
+			private 1.14 random 16;		// Ljavacard/security/RandomData;
+			private byte[] scratch 17;		// [B
+			private byte[] zeroIV 18;		// [B
+			private boolean isUnlocked 19;		// Z
+			private byte pinTries 20;		// B
 		}
 
 		.publicMethodTable 1 {
 			equals(Ljava/lang/Object;)Z;
+			processUnblockCard([BSS)V;
 			decryptIncomingData([BSS)S;
 			setupCard([BSS)V;
 			resetUserKey([BS)V;
 			verifyPinHybrid([BSS)V;
 			processResetUserKeyHybrid([BSS)V;
 			processChangePinHybrid([BSS)V;
+			signData([BSS[BS)S;
 			getCardPublicKey()Ljavacard/security/RSAPublicKey;;
 			setAppPublicKey([BSS)V;
 			encryptAndPackData([BSS[BS)S;
@@ -457,7 +474,7 @@
 					sspush 1024;
 					sconst_0;
 					invokestatic 28;		// javacard/security/KeyBuilder.buildKey(BSZ)Ljavacard/security/Key;
-					checkcast 0 40;		// T_CLASSORINTERFACE javacard/security/RSAPublicKey
+					checkcast 0 41;		// T_CLASSORINTERFACE javacard/security/RSAPublicKey
 					putfield_a 9;		// reference crypto/SecurityManager.appPublicKey
 					aload_0;
 					bspush 16;
@@ -508,47 +525,144 @@
 					invokestatic 35;		// javacardx/crypto/Cipher.getInstance(BZ)Ljavacardx/crypto/Cipher;
 					putfield_a 20;		// reference crypto/SecurityManager.rsaCipher
 					aload_0;
+					bspush 10;
+					sconst_0;
+					invokestatic 38;		// javacard/security/Signature.getInstance(BZ)Ljavacard/security/Signature;
+					putfield_a 21;		// reference crypto/SecurityManager.rsaSignature
+					aload_0;
 					sconst_2;
-					invokestatic 38;		// javacard/security/RandomData.getInstance(B)Ljavacard/security/RandomData;
-					putfield_a 21;		// reference crypto/SecurityManager.random
+					invokestatic 40;		// javacard/security/RandomData.getInstance(B)Ljavacard/security/RandomData;
+					putfield_a 22;		// reference crypto/SecurityManager.random
 					aload_0;
 					sspush 128;
 					sconst_1;
 					invokestatic 30;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
-					putfield_a 22;		// reference crypto/SecurityManager.scratch
+					putfield_a 23;		// reference crypto/SecurityManager.scratch
 					aload_0;
 					bspush 16;
 					sconst_1;
 					invokestatic 30;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
-					putfield_a 23;		// reference crypto/SecurityManager.zeroIV
+					putfield_a 24;		// reference crypto/SecurityManager.zeroIV
 					aload_0;
 					sconst_0;
-					putfield_b 24;		// boolean crypto/SecurityManager.isUnlocked
+					putfield_b 25;		// boolean crypto/SecurityManager.isUnlocked
 					aload_0;
 					sconst_0;
-					putfield_b 25;		// byte crypto/SecurityManager.pinTries
+					putfield_b 26;		// byte crypto/SecurityManager.pinTries
 					return;
 		}
 
-		.method public decryptIncomingData([BSS)S 1 {
+		.method private checkAdminPin([BS)Z {
+			.stack 10;
+			.locals 0;
+
+				L0:	getfield_a_this 17;		// reference crypto/SecurityManager.pbkdf2
+					aload_1;
+					sload_2;
+					bspush 6;
+					getfield_a_this 16;		// reference crypto/SecurityManager.adminSalt
+					sconst_0;
+					bspush 16;
+					sspush 500;
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
+					bspush 64;
+					invokevirtual 46;		// derive([BSS[BSSS[BS)V
+					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
+					bspush 64;
+					invokeinterface 3 29 4;		// javacard/security/AESKey
+					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
+					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
+					sconst_1;
+					getfield_a_this 24;		// reference crypto/SecurityManager.zeroIV
+					sconst_0;
+					bspush 16;
+					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
+					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
+					getfield_a_this 13;		// reference crypto/SecurityManager.encryptedAdminKey
+					sconst_0;
+					bspush 16;
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
+					bspush 80;
+					invokevirtual 48;		// doFinal([BSS[BS)S
+					pop;
+					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
+					invokevirtual 43;		// reset()V
+					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
+					bspush 80;
+					bspush 16;
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
+					bspush 96;
+					invokevirtual 45;		// doFinal([BSS[BS)S
+					pop;
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
+					bspush 96;
+					getfield_a_this 15;		// reference crypto/SecurityManager.adminKeyHash
+					sconst_0;
+					bspush 32;
+					invokestatic 49;		// javacard/framework/Util.arrayCompare([BS[BSS)B
+					ifne L2;
+				L1:	sconst_1;
+					goto L3;
+				L2:	sconst_0;
+				L3:	sreturn;
+		}
+
+		.method public processUnblockCard([BSS)V 1 {
+			.stack 4;
+			.locals 1;
+
+				L0:	aload_0;
+					aload_1;
+					sload_2;
+					sload_3;
+					invokevirtual 50;		// decryptIncomingData([BSS)S
+					sstore 4;
+				L1:	sload 4;
+					bspush 6;
+					if_scmpge L3;
+				L2:	sspush 26368;
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
+				L3:	aload_0;
+					aload_1;
+					sload_2;
+					invokespecial 52;		// crypto/SecurityManager.checkAdminPin([BS)Z
+					ifeq L5;
+				L4:	aload_0;
+					sconst_0;
+					putfield_b 26;		// byte crypto/SecurityManager.pinTries
+					goto L6;
+				L5:	sspush 25344;
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
+				L6:	aload_1;
+					sload_2;
+					sload 4;
+					sconst_0;
+					invokestatic 42;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					return;
+		}
+
+		.method public decryptIncomingData([BSS)S 2 {
 			.stack 6;
 			.locals 3;
 
 				L0:	getfield_a_this 20;		// reference crypto/SecurityManager.rsaCipher
 					getfield_a_this 8;		// reference crypto/SecurityManager.cardRsaKeyPair
-					invokevirtual 44;		// getPrivate()Ljavacard/security/PrivateKey;
+					invokevirtual 53;		// getPrivate()Ljavacard/security/PrivateKey;
 					sconst_1;
-					invokevirtual 45;		// init(Ljavacard/security/Key;B)V
+					invokevirtual 54;		// init(Ljavacard/security/Key;B)V
 					getfield_a_this 20;		// reference crypto/SecurityManager.rsaCipher
 					aload_1;
 					sload_2;
 					sspush 128;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					pop;
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
 					invokeinterface 3 29 4;		// javacard/security/AESKey
 					sload_2;
@@ -562,7 +676,7 @@
 				L2:	getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
 					sconst_1;
-					getfield_a_this 23;		// reference crypto/SecurityManager.zeroIV
+					getfield_a_this 24;		// reference crypto/SecurityManager.zeroIV
 					sconst_0;
 					bspush 16;
 					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
@@ -572,19 +686,19 @@
 					sload 5;
 					aload_1;
 					sload_2;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					sstore 6;
-				L3:	getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+				L3:	getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
 					bspush 16;
 					sconst_0;
-					invokestatic 41;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 42;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					sload 6;
 					sreturn;
 		}
 
-		.method public setupCard([BSS)V 2 {
+		.method public setupCard([BSS)V 3 {
 			.stack 10;
 			.locals 4;
 
@@ -592,30 +706,30 @@
 					aload_1;
 					sload_2;
 					sload_3;
-					invokevirtual 49;		// decryptIncomingData([BSS)S
+					invokevirtual 50;		// decryptIncomingData([BSS)S
 					sstore 4;
 				L1:	sload 4;
 					bspush 12;
 					if_scmpge L3;
 				L2:	sspush 26368;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
 				L3:	sload_2;
 					sstore 5;
 				L4:	sload_2;
 					bspush 6;
 					sadd;
 					sstore 6;
-				L5:	invokestatic 51;		// javacard/framework/JCSystem.beginTransaction()V
-				L6:	getfield_a_this 21;		// reference crypto/SecurityManager.random
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+				L5:	invokestatic 56;		// javacard/framework/JCSystem.beginTransaction()V
+				L6:	getfield_a_this 22;		// reference crypto/SecurityManager.random
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 16;
 					bspush 16;
-					invokevirtual 52;		// generateData([BSS)V
-					getfield_a_this 21;		// reference crypto/SecurityManager.random
+					invokevirtual 57;		// generateData([BSS)V
+					getfield_a_this 22;		// reference crypto/SecurityManager.random
 					getfield_a_this 12;		// reference crypto/SecurityManager.cardSalt
 					sconst_0;
 					bspush 16;
-					invokevirtual 52;		// generateData([BSS)V
+					invokevirtual 57;		// generateData([BSS)V
 					getfield_a_this 17;		// reference crypto/SecurityManager.pbkdf2
 					aload_1;
 					sload 5;
@@ -624,48 +738,48 @@
 					sconst_0;
 					bspush 16;
 					sspush 500;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
-					invokevirtual 53;		// derive([BSS[BSSS[BS)V
+					invokevirtual 46;		// derive([BSS[BSSS[BS)V
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
 					invokeinterface 3 29 4;		// javacard/security/AESKey
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
 					sconst_2;
-					getfield_a_this 23;		// reference crypto/SecurityManager.zeroIV
+					getfield_a_this 24;		// reference crypto/SecurityManager.zeroIV
 					sconst_0;
 					bspush 16;
 					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 16;
 					bspush 16;
 					getfield_a_this 10;		// reference crypto/SecurityManager.encryptedMasterKey
 					sconst_0;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					pop;
 					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					invokevirtual 42;		// reset()V
+					invokevirtual 43;		// reset()V
 					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 16;
 					bspush 16;
 					getfield_a_this 11;		// reference crypto/SecurityManager.masterKeyHash
 					sconst_0;
-					invokevirtual 26;		// doFinal([BSS[BS)S
+					invokevirtual 45;		// doFinal([BSS[BS)S
 					pop;
-					getfield_a_this 21;		// reference crypto/SecurityManager.random
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 22;		// reference crypto/SecurityManager.random
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 32;
 					bspush 16;
-					invokevirtual 52;		// generateData([BSS)V
-					getfield_a_this 21;		// reference crypto/SecurityManager.random
+					invokevirtual 57;		// generateData([BSS)V
+					getfield_a_this 22;		// reference crypto/SecurityManager.random
 					getfield_a_this 16;		// reference crypto/SecurityManager.adminSalt
 					sconst_0;
 					bspush 16;
-					invokevirtual 52;		// generateData([BSS)V
+					invokevirtual 57;		// generateData([BSS)V
 					getfield_a_this 17;		// reference crypto/SecurityManager.pbkdf2
 					aload_1;
 					sload 6;
@@ -674,77 +788,77 @@
 					sconst_0;
 					bspush 16;
 					sspush 500;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 64;
-					invokevirtual 53;		// derive([BSS[BSSS[BS)V
+					invokevirtual 46;		// derive([BSS[BSSS[BS)V
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 64;
 					invokeinterface 3 29 4;		// javacard/security/AESKey
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
 					sconst_2;
-					getfield_a_this 23;		// reference crypto/SecurityManager.zeroIV
+					getfield_a_this 24;		// reference crypto/SecurityManager.zeroIV
 					sconst_0;
 					bspush 16;
 					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 32;
 					bspush 16;
 					getfield_a_this 13;		// reference crypto/SecurityManager.encryptedAdminKey
 					sconst_0;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					pop;
 					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					invokevirtual 42;		// reset()V
+					invokevirtual 43;		// reset()V
 					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 32;
 					bspush 16;
 					getfield_a_this 15;		// reference crypto/SecurityManager.adminKeyHash
 					sconst_0;
-					invokevirtual 26;		// doFinal([BSS[BS)S
+					invokevirtual 45;		// doFinal([BSS[BS)S
 					pop;
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 32;
 					invokeinterface 3 29 4;		// javacard/security/AESKey
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
 					sconst_2;
-					getfield_a_this 23;		// reference crypto/SecurityManager.zeroIV
+					getfield_a_this 24;		// reference crypto/SecurityManager.zeroIV
 					sconst_0;
 					bspush 16;
 					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 16;
 					bspush 16;
 					getfield_a_this 14;		// reference crypto/SecurityManager.encryptedMasterKeyByAdmin
 					sconst_0;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					pop;
-					invokestatic 54;		// javacard/framework/JCSystem.commitTransaction()V
+					invokestatic 58;		// javacard/framework/JCSystem.commitTransaction()V
 				L7:	goto L10;
 				L8:	astore 7;
-				L9:	invokestatic 55;		// javacard/framework/JCSystem.abortTransaction()V
+				L9:	invokestatic 59;		// javacard/framework/JCSystem.abortTransaction()V
 					sspush 28416;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
-				L10:	getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
+				L10:	getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
 					sspush 128;
 					sconst_0;
-					invokestatic 41;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 42;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					return;
 			.exceptionTable {
 				// start_block end_block handler_block catch_type_index
-				L6 L7 L8 48;
+				L6 L7 L8 55;
 			}
 		}
 
-		.method public resetUserKey([BS)V 3 {
+		.method public resetUserKey([BS)V 4 {
 			.stack 10;
 			.locals 3;
 
@@ -754,55 +868,13 @@
 					bspush 6;
 					sadd;
 					sstore 4;
-				L2:	getfield_a_this 17;		// reference crypto/SecurityManager.pbkdf2
+				L2:	aload_0;
 					aload_1;
 					sload_3;
-					bspush 6;
-					getfield_a_this 16;		// reference crypto/SecurityManager.adminSalt
-					sconst_0;
-					bspush 16;
-					sspush 500;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
-					bspush 64;
-					invokevirtual 53;		// derive([BSS[BSSS[BS)V
-					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
-					bspush 64;
-					invokeinterface 3 29 4;		// javacard/security/AESKey
-					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
-					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					sconst_1;
-					getfield_a_this 23;		// reference crypto/SecurityManager.zeroIV
-					sconst_0;
-					bspush 16;
-					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
-					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
-					getfield_a_this 13;		// reference crypto/SecurityManager.encryptedAdminKey
-					sconst_0;
-					bspush 16;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
-					bspush 80;
-					invokevirtual 46;		// doFinal([BSS[BS)S
-					pop;
-					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					invokevirtual 42;		// reset()V
-					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
-					bspush 80;
-					bspush 16;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
-					bspush 96;
-					invokevirtual 26;		// doFinal([BSS[BS)S
-					pop;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
-					bspush 96;
-					getfield_a_this 15;		// reference crypto/SecurityManager.adminKeyHash
-					sconst_0;
-					bspush 32;
-					invokestatic 56;		// javacard/framework/Util.arrayCompare([BS[BSS)B
-					ifeq L5;
+					invokespecial 52;		// crypto/SecurityManager.checkAdminPin([BS)Z
+					ifne L5;
 				L3:	sspush 26112;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 96;
 					baload;
 					sspush 255;
@@ -810,16 +882,16 @@
 					sor;
 					sstore 5;
 				L4:	sload 5;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
-				L5:	invokestatic 51;		// javacard/framework/JCSystem.beginTransaction()V
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
+				L5:	invokestatic 56;		// javacard/framework/JCSystem.beginTransaction()V
 				L6:	getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 80;
 					invokeinterface 3 29 4;		// javacard/security/AESKey
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
 					sconst_1;
-					getfield_a_this 23;		// reference crypto/SecurityManager.zeroIV
+					getfield_a_this 24;		// reference crypto/SecurityManager.zeroIV
 					sconst_0;
 					bspush 16;
 					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
@@ -827,9 +899,9 @@
 					getfield_a_this 14;		// reference crypto/SecurityManager.encryptedMasterKeyByAdmin
 					sconst_0;
 					bspush 16;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 16;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					pop;
 					getfield_a_this 17;		// reference crypto/SecurityManager.pbkdf2
 					aload_1;
@@ -839,90 +911,90 @@
 					sconst_0;
 					bspush 16;
 					sspush 500;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 64;
-					invokevirtual 53;		// derive([BSS[BSSS[BS)V
+					invokevirtual 46;		// derive([BSS[BSSS[BS)V
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 64;
 					invokeinterface 3 29 4;		// javacard/security/AESKey
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
 					sconst_2;
-					getfield_a_this 23;		// reference crypto/SecurityManager.zeroIV
+					getfield_a_this 24;		// reference crypto/SecurityManager.zeroIV
 					sconst_0;
 					bspush 16;
 					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 16;
 					bspush 16;
 					getfield_a_this 10;		// reference crypto/SecurityManager.encryptedMasterKey
 					sconst_0;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					pop;
 					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					invokevirtual 42;		// reset()V
+					invokevirtual 43;		// reset()V
 					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 16;
 					bspush 16;
 					getfield_a_this 11;		// reference crypto/SecurityManager.masterKeyHash
 					sconst_0;
-					invokevirtual 26;		// doFinal([BSS[BS)S
+					invokevirtual 45;		// doFinal([BSS[BS)S
 					pop;
 					aload_0;
 					sconst_0;
-					putfield_b 25;		// byte crypto/SecurityManager.pinTries
-					invokestatic 54;		// javacard/framework/JCSystem.commitTransaction()V
+					putfield_b 26;		// byte crypto/SecurityManager.pinTries
+					invokestatic 58;		// javacard/framework/JCSystem.commitTransaction()V
 				L7:	goto L10;
 				L8:	astore 5;
-				L9:	invokestatic 55;		// javacard/framework/JCSystem.abortTransaction()V
+				L9:	invokestatic 59;		// javacard/framework/JCSystem.abortTransaction()V
 					sspush 28416;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
-				L10:	getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
+				L10:	getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
 					sspush 128;
 					sconst_0;
-					invokestatic 41;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 42;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					return;
 			.exceptionTable {
 				// start_block end_block handler_block catch_type_index
-				L6 L7 L8 48;
+				L6 L7 L8 55;
 			}
 		}
 
-		.method public verifyPinHybrid([BSS)V 4 {
+		.method public verifyPinHybrid([BSS)V 5 {
 			.stack 4;
 			.locals 1;
 
-				L0:	getfield_b_this 25;		// byte crypto/SecurityManager.pinTries
+				L0:	getfield_b_this 26;		// byte crypto/SecurityManager.pinTries
 					sconst_3;
 					if_scmplt L2;
 				L1:	sspush 27011;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
 				L2:	aload_0;
 					aload_1;
 					sload_2;
 					sload_3;
-					invokevirtual 49;		// decryptIncomingData([BSS)S
+					invokevirtual 50;		// decryptIncomingData([BSS)S
 					sstore 4;
 				L3:	sload 4;
 					bspush 6;
 					if_scmpge L5;
 				L4:	sspush 26368;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
 				L5:	aload_0;
 					aload_1;
 					sload_2;
 					bspush 6;
-					invokespecial 57;		// crypto/SecurityManager.verifyPinInternal([BSS)V
+					invokespecial 60;		// crypto/SecurityManager.verifyPinInternal([BSS)V
 					aload_1;
 					sload_2;
 					sload 4;
 					sconst_0;
-					invokestatic 41;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 42;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					return;
 		}
@@ -939,17 +1011,17 @@
 					sconst_0;
 					bspush 16;
 					sspush 500;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 64;
-					invokevirtual 53;		// derive([BSS[BSSS[BS)V
+					invokevirtual 46;		// derive([BSS[BSSS[BS)V
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 64;
 					invokeinterface 3 29 4;		// javacard/security/AESKey
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
 					sconst_1;
-					getfield_a_this 23;		// reference crypto/SecurityManager.zeroIV
+					getfield_a_this 24;		// reference crypto/SecurityManager.zeroIV
 					sconst_0;
 					bspush 16;
 					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
@@ -957,50 +1029,50 @@
 					getfield_a_this 10;		// reference crypto/SecurityManager.encryptedMasterKey
 					sconst_0;
 					bspush 16;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 80;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					pop;
 					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					invokevirtual 42;		// reset()V
+					invokevirtual 43;		// reset()V
 					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 80;
 					bspush 16;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 96;
-					invokevirtual 26;		// doFinal([BSS[BS)S
+					invokevirtual 45;		// doFinal([BSS[BS)S
 					pop;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 96;
 					getfield_a_this 11;		// reference crypto/SecurityManager.masterKeyHash
 					sconst_0;
 					bspush 32;
-					invokestatic 56;		// javacard/framework/Util.arrayCompare([BS[BSS)B
+					invokestatic 49;		// javacard/framework/Util.arrayCompare([BS[BSS)B
 					ifne L2;
 				L1:	aload_0;
 					sconst_0;
-					putfield_b 25;		// byte crypto/SecurityManager.pinTries
+					putfield_b 26;		// byte crypto/SecurityManager.pinTries
 					aload_0;
 					sconst_1;
-					putfield_b 24;		// boolean crypto/SecurityManager.isUnlocked
+					putfield_b 25;		// boolean crypto/SecurityManager.isUnlocked
 					getfield_a_this 6;		// reference crypto/SecurityManager.masterKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 80;
 					invokeinterface 3 29 4;		// javacard/security/AESKey
 					goto L4;
 				L2:	aload_0;
 					dup;
-					getfield_b 25;		// byte crypto/SecurityManager.pinTries
+					getfield_b 26;		// byte crypto/SecurityManager.pinTries
 					sconst_1;
 					sadd;
 					s2b;
-					putfield_b 25;		// byte crypto/SecurityManager.pinTries
+					putfield_b 26;		// byte crypto/SecurityManager.pinTries
 					aload_0;
 					sconst_0;
-					putfield_b 24;		// boolean crypto/SecurityManager.isUnlocked
+					putfield_b 25;		// boolean crypto/SecurityManager.isUnlocked
 					sspush 26112;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 96;
 					baload;
 					sspush 255;
@@ -1008,11 +1080,11 @@
 					sor;
 					sstore 4;
 				L3:	sload 4;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
 				L4:	return;
 		}
 
-		.method public processResetUserKeyHybrid([BSS)V 5 {
+		.method public processResetUserKeyHybrid([BSS)V 6 {
 			.stack 4;
 			.locals 1;
 
@@ -1020,27 +1092,27 @@
 					aload_1;
 					sload_2;
 					sload_3;
-					invokevirtual 49;		// decryptIncomingData([BSS)S
+					invokevirtual 50;		// decryptIncomingData([BSS)S
 					sstore 4;
 				L1:	sload 4;
 					bspush 12;
 					if_scmpge L3;
 				L2:	sspush 26368;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
 				L3:	aload_0;
 					aload_1;
 					sload_2;
-					invokevirtual 58;		// resetUserKey([BS)V
+					invokevirtual 61;		// resetUserKey([BS)V
 					aload_1;
 					sload_2;
 					sload 4;
 					sconst_0;
-					invokestatic 41;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 42;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					return;
 		}
 
-		.method public processChangePinHybrid([BSS)V 6 {
+		.method public processChangePinHybrid([BSS)V 7 {
 			.stack 4;
 			.locals 1;
 
@@ -1048,22 +1120,22 @@
 					aload_1;
 					sload_2;
 					sload_3;
-					invokevirtual 49;		// decryptIncomingData([BSS)S
+					invokevirtual 50;		// decryptIncomingData([BSS)S
 					sstore 4;
 				L1:	sload 4;
 					bspush 12;
 					if_scmpge L3;
 				L2:	sspush 26368;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
 				L3:	aload_0;
 					aload_1;
 					sload_2;
-					invokespecial 59;		// crypto/SecurityManager.changePin([BS)V
+					invokespecial 62;		// crypto/SecurityManager.changePin([BS)V
 					aload_1;
 					sload_2;
 					sload 4;
 					sconst_0;
-					invokestatic 41;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 42;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					return;
 		}
@@ -1086,17 +1158,17 @@
 					sconst_0;
 					bspush 16;
 					sspush 500;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 64;
-					invokevirtual 53;		// derive([BSS[BSSS[BS)V
+					invokevirtual 46;		// derive([BSS[BSSS[BS)V
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 64;
 					invokeinterface 3 29 4;		// javacard/security/AESKey
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
 					sconst_1;
-					getfield_a_this 23;		// reference crypto/SecurityManager.zeroIV
+					getfield_a_this 24;		// reference crypto/SecurityManager.zeroIV
 					sconst_0;
 					bspush 16;
 					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
@@ -1104,37 +1176,37 @@
 					getfield_a_this 10;		// reference crypto/SecurityManager.encryptedMasterKey
 					sconst_0;
 					bspush 16;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 16;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					pop;
 					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					invokevirtual 42;		// reset()V
+					invokevirtual 43;		// reset()V
 					getfield_a_this 18;		// reference crypto/SecurityManager.sha256
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 16;
 					bspush 16;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 96;
-					invokevirtual 26;		// doFinal([BSS[BS)S
+					invokevirtual 45;		// doFinal([BSS[BS)S
 					pop;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 96;
 					getfield_a_this 11;		// reference crypto/SecurityManager.masterKeyHash
 					sconst_0;
 					bspush 32;
-					invokestatic 56;		// javacard/framework/Util.arrayCompare([BS[BSS)B
+					invokestatic 49;		// javacard/framework/Util.arrayCompare([BS[BSS)B
 					ifeq L4;
 				L3:	aload_0;
 					dup;
-					getfield_b 25;		// byte crypto/SecurityManager.pinTries
+					getfield_b 26;		// byte crypto/SecurityManager.pinTries
 					sconst_1;
 					sadd;
 					s2b;
-					putfield_b 25;		// byte crypto/SecurityManager.pinTries
+					putfield_b 26;		// byte crypto/SecurityManager.pinTries
 					sspush 25344;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
-				L4:	invokestatic 51;		// javacard/framework/JCSystem.beginTransaction()V
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
+				L4:	invokestatic 56;		// javacard/framework/JCSystem.beginTransaction()V
 				L5:	getfield_a_this 17;		// reference crypto/SecurityManager.pbkdf2
 					aload_1;
 					sload 4;
@@ -1143,63 +1215,82 @@
 					sconst_0;
 					bspush 16;
 					sspush 500;
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 64;
-					invokevirtual 53;		// derive([BSS[BSSS[BS)V
+					invokevirtual 46;		// derive([BSS[BSSS[BS)V
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 64;
 					invokeinterface 3 29 4;		// javacard/security/AESKey
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
 					sconst_2;
-					getfield_a_this 23;		// reference crypto/SecurityManager.zeroIV
+					getfield_a_this 24;		// reference crypto/SecurityManager.zeroIV
 					sconst_0;
 					bspush 16;
 					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
 					getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					bspush 16;
 					bspush 16;
 					getfield_a_this 10;		// reference crypto/SecurityManager.encryptedMasterKey
 					sconst_0;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					pop;
 					aload_0;
 					sconst_0;
-					putfield_b 25;		// byte crypto/SecurityManager.pinTries
-					invokestatic 54;		// javacard/framework/JCSystem.commitTransaction()V
+					putfield_b 26;		// byte crypto/SecurityManager.pinTries
+					invokestatic 58;		// javacard/framework/JCSystem.commitTransaction()V
 				L6:	goto L9;
 				L7:	astore 5;
-				L8:	invokestatic 55;		// javacard/framework/JCSystem.abortTransaction()V
+				L8:	invokestatic 59;		// javacard/framework/JCSystem.abortTransaction()V
 					sspush 28416;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
-				L9:	getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
+				L9:	getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
 					sspush 128;
 					sconst_0;
-					invokestatic 41;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 42;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					return;
 			.exceptionTable {
 				// start_block end_block handler_block catch_type_index
-				L5 L6 L7 48;
+				L5 L6 L7 55;
 			}
 		}
 
-		.method public getCardPublicKey()Ljavacard/security/RSAPublicKey; 7 {
+		.method public signData([BSS[BS)S 8 {
+			.stack 6;
+			.locals 0;
+
+				L0:	getfield_a_this 21;		// reference crypto/SecurityManager.rsaSignature
+					getfield_a_this 8;		// reference crypto/SecurityManager.cardRsaKeyPair
+					invokevirtual 53;		// getPrivate()Ljavacard/security/PrivateKey;
+					sconst_1;
+					invokevirtual 63;		// init(Ljavacard/security/Key;B)V
+					getfield_a_this 21;		// reference crypto/SecurityManager.rsaSignature
+					aload_1;
+					sload_2;
+					sload_3;
+					aload 4;
+					sload 5;
+					invokevirtual 64;		// sign([BSS[BS)S
+					sreturn;
+		}
+
+		.method public getCardPublicKey()Ljavacard/security/RSAPublicKey; 9 {
 			.stack 1;
 			.locals 0;
 
 			.descriptor	Ljavacard/security/RSAPublicKey;	1.9;
 
 				L0:	getfield_a_this 8;		// reference crypto/SecurityManager.cardRsaKeyPair
-					invokevirtual 60;		// getPublic()Ljavacard/security/PublicKey;
-					checkcast 0 40;		// T_CLASSORINTERFACE javacard/security/RSAPublicKey
+					invokevirtual 65;		// getPublic()Ljavacard/security/PublicKey;
+					checkcast 0 41;		// T_CLASSORINTERFACE javacard/security/RSAPublicKey
 					areturn;
 		}
 
-		.method public setAppPublicKey([BSS)V 8 {
+		.method public setAppPublicKey([BSS)V 10 {
 			.stack 4;
 			.locals 1;
 
@@ -1207,7 +1298,7 @@
 					aload_1;
 					sload_2;
 					sload_3;
-					invokeinterface 4 40 7;		// javacard/security/RSAPublicKey
+					invokeinterface 4 41 7;		// javacard/security/RSAPublicKey
 					sconst_3;
 					newarray 11;
 					dup;
@@ -1227,39 +1318,39 @@
 					aload 4;
 					sconst_0;
 					sconst_3;
-					invokeinterface 4 40 6;		// javacard/security/RSAPublicKey
+					invokeinterface 4 41 6;		// javacard/security/RSAPublicKey
 					return;
 		}
 
-		.method public encryptAndPackData([BSS[BS)S 9 {
+		.method public encryptAndPackData([BSS[BS)S 11 {
 			.stack 7;
 			.locals 2;
 
-				L0:	getfield_a_this 21;		// reference crypto/SecurityManager.random
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+				L0:	getfield_a_this 22;		// reference crypto/SecurityManager.random
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
 					bspush 16;
-					invokevirtual 52;		// generateData([BSS)V
+					invokevirtual 57;		// generateData([BSS)V
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
 					invokeinterface 3 29 4;		// javacard/security/AESKey
 					getfield_a_this 20;		// reference crypto/SecurityManager.rsaCipher
 					getfield_a_this 9;		// reference crypto/SecurityManager.appPublicKey
 					sconst_2;
-					invokevirtual 45;		// init(Ljavacard/security/Key;B)V
+					invokevirtual 54;		// init(Ljavacard/security/Key;B)V
 					getfield_a_this 20;		// reference crypto/SecurityManager.rsaCipher
-					getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+					getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
 					bspush 16;
 					aload 4;
 					sload 5;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					sstore 6;
 				L1:	getfield_a_this 19;		// reference crypto/SecurityManager.aesCipher
 					getfield_a_this 7;		// reference crypto/SecurityManager.tempKey
 					sconst_2;
-					getfield_a_this 23;		// reference crypto/SecurityManager.zeroIV
+					getfield_a_this 24;		// reference crypto/SecurityManager.zeroIV
 					sconst_0;
 					bspush 16;
 					invokevirtual 47;		// init(Ljavacard/security/Key;B[BSS)V
@@ -1271,13 +1362,13 @@
 					sload 5;
 					sload 6;
 					sadd;
-					invokevirtual 46;		// doFinal([BSS[BS)S
+					invokevirtual 48;		// doFinal([BSS[BS)S
 					sstore 7;
-				L2:	getfield_a_this 22;		// reference crypto/SecurityManager.scratch
+				L2:	getfield_a_this 23;		// reference crypto/SecurityManager.scratch
 					sconst_0;
 					bspush 16;
 					sconst_0;
-					invokestatic 41;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 42;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					sload 6;
 					sload 7;
@@ -1285,7 +1376,7 @@
 					sreturn;
 		}
 
-		.method public loadAppPublicKey([BS)V 10 {
+		.method public loadAppPublicKey([BS)V 12 {
 			.stack 4;
 			.locals 1;
 
@@ -1293,7 +1384,7 @@
 					aload_1;
 					sload_2;
 					sspush 128;
-					invokeinterface 4 40 7;		// javacard/security/RSAPublicKey
+					invokeinterface 4 41 7;		// javacard/security/RSAPublicKey
 					sconst_3;
 					newarray 11;
 					dup;
@@ -1313,29 +1404,29 @@
 					aload_3;
 					sconst_0;
 					sconst_3;
-					invokeinterface 4 40 6;		// javacard/security/RSAPublicKey
+					invokeinterface 4 41 6;		// javacard/security/RSAPublicKey
 					return;
 		}
 
-		.method public getMasterKey()Ljavacard/security/AESKey; 11 {
+		.method public getMasterKey()Ljavacard/security/AESKey; 13 {
 			.stack 1;
 			.locals 0;
 
 			.descriptor	Ljavacard/security/AESKey;	1.20;
 
-				L0:	getfield_b_this 24;		// boolean crypto/SecurityManager.isUnlocked
+				L0:	getfield_b_this 25;		// boolean crypto/SecurityManager.isUnlocked
 					ifne L2;
 				L1:	sspush 27010;
-					invokestatic 50;		// javacard/framework/ISOException.throwIt(S)V
+					invokestatic 51;		// javacard/framework/ISOException.throwIt(S)V
 				L2:	getfield_a_this 6;		// reference crypto/SecurityManager.masterKey
 					areturn;
 		}
 
-		.method public isCardBlocked()Z 12 {
+		.method public isCardBlocked()Z 14 {
 			.stack 2;
 			.locals 0;
 
-				L0:	getfield_b_this 25;		// byte crypto/SecurityManager.pinTries
+				L0:	getfield_b_this 26;		// byte crypto/SecurityManager.pinTries
 					sconst_3;
 					if_scmplt L2;
 				L1:	sconst_1;

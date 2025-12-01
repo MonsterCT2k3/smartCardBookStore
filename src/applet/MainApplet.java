@@ -27,13 +27,15 @@ public class MainApplet extends Applet implements ExtendedLength {
             return;
 
         byte[] buffer = apdu.getBuffer();
+        byte ins = buffer[ISO7816.OFFSET_INS];
 
         // Kiem tra xem the co bi khoa cung khong
-        if (secManager.isCardBlocked()) {
+        // CHO PHEP LENH UNBLOCK (0x26) va RESET PIN (0x50) CHAY KHI KHOA
+        if (secManager.isCardBlocked() && ins != Constants.INS_UNBLOCK_PIN && ins != Constants.INS_RESET_USER_KEY) {
             ISOException.throwIt(Constants.SW_CARD_LOCKED);
         }
 
-        switch (buffer[ISO7816.OFFSET_INS]) {
+        switch (ins) {
             // --- NHOM 1: SETUP & HANDSHAKE ---
 
             case Constants.INS_SETUP_CARD:
@@ -42,6 +44,10 @@ public class MainApplet extends Applet implements ExtendedLength {
 
             case Constants.INS_CHANGE_PIN:
                 handleChangePin(apdu);
+                break;
+
+            case Constants.INS_UNBLOCK_PIN:
+                handleUnblockPin(apdu);
                 break;
 
             case Constants.INS_RESET_USER_KEY:
@@ -81,6 +87,10 @@ public class MainApplet extends Applet implements ExtendedLength {
                 handleAuthGetCardId(apdu);
                 break;
 
+            case Constants.INS_AUTH_CHALLENGE:
+                handleAuthChallenge(apdu);
+                break;
+
             case Constants.INS_UPDATE_INFO:
                 // Logic update info tuong tu (Decrypt goi tin -> Ghi vao DB)
                 // (Phan nay ban tu trien khai dua tren logic nguoc lai cua Get Info)
@@ -109,6 +119,12 @@ public class MainApplet extends Applet implements ExtendedLength {
         byte[] buffer = apdu.getBuffer();
         short len = apdu.setIncomingAndReceive();
         secManager.processChangePinHybrid(buffer, ISO7816.OFFSET_CDATA, len);
+    }
+
+    private void handleUnblockPin(APDU apdu) {
+        byte[] buffer = apdu.getBuffer();
+        short len = apdu.setIncomingAndReceive();
+        secManager.processUnblockCard(buffer, ISO7816.OFFSET_CDATA, len);
     }
 
     private void handleResetUserKey(APDU apdu) {
@@ -184,6 +200,19 @@ public class MainApplet extends Applet implements ExtendedLength {
 
         // 5. Gui
         apdu.sendBytes((short) 0, (short) 144);
+    }
+
+    private void handleAuthChallenge(APDU apdu) {
+        byte[] buffer = apdu.getBuffer();
+        short len = apdu.setIncomingAndReceive(); // Nhan Challenge (Random Bytes) tu Client
+
+        // 1. Ky vao du lieu Challenge nhan duoc
+        // Ghi chu ky de len chinh buffer input (vi challenge khong can dung nua)
+        // Offset 0: Noi ghi chu ky tra ve
+        short sigLen = secManager.signData(buffer, ISO7816.OFFSET_CDATA, len, buffer, (short) 0);
+
+        // 2. Gui chu ky ve cho Client
+        apdu.setOutgoingAndSend((short) 0, sigLen);
     }
 
     private void handleGetInfoSecure(APDU apdu) {

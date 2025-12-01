@@ -30,6 +30,7 @@ public class SecurityManager {
     private MessageDigest sha256;
     private Cipher aesCipher; // AES CBC NOPAD
     private Cipher rsaCipher; // RSA PKCS1
+    private Signature rsaSignature; // Chu ky so
     private RandomData random; // Sinh so ngau nhien
 
     // --- BO NHO DEM (RAM) ---
@@ -68,6 +69,7 @@ public class SecurityManager {
         sha256 = MessageDigest.getInstance(MessageDigest.ALG_SHA_256, false);
         aesCipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
         rsaCipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
+        rsaSignature = Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false);
         random = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
 
         // Buffer tam trong RAM (Transient)
@@ -82,6 +84,49 @@ public class SecurityManager {
     // =========================================================================
     // PHAN 1: QUAN LY SETUP & PIN (DATA AT REST)
     // =========================================================================
+
+    // HAM HELPER: Check Admin PIN (Tra ve true neu dung)
+    // Luu y: Ham nay se luu Admin Key Plain vao scratch[80..95] de cac ham sau su
+    // dung
+    private boolean checkAdminPin(byte[] pinBuffer, short pinOffset) {
+        // Derive AdminPIN -> Key thu (scratch[64])
+        pbkdf2.derive(pinBuffer, pinOffset, (short) 6, adminSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS,
+                scratch, (short) 64);
+        tempKey.setKey(scratch, (short) 64);
+
+        // Giai ma encryptedAdminKey -> scratch[80]
+        // *** FIX IV: Luon dung IV 0 de dong bo ***
+        aesCipher.init(tempKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
+        aesCipher.doFinal(encryptedAdminKey, (short) 0, (short) 16, scratch, (short) 80);
+
+        // Hash -> scratch[96]
+        sha256.reset();
+        sha256.doFinal(scratch, (short) 80, (short) 16, scratch, (short) 96);
+
+        // Compare Hash
+        return Util.arrayCompare(scratch, (short) 96, adminKeyHash, (short) 0, (short) 32) == 0;
+    }
+
+    // Ham Unblock Card (chi reset pinTries, khong doi PIN)
+    public void processUnblockCard(byte[] buffer, short offset, short len) {
+        // 1. Giai ma Admin PIN tu goi tin Hybrid
+        short plainLen = decryptIncomingData(buffer, offset, len);
+
+        // Admin PIN = 6 bytes
+        if (plainLen < 6)
+            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+
+        // 2. Verify Admin PIN
+        if (checkAdminPin(buffer, offset)) {
+            // Dung Admin PIN -> Reset counter
+            pinTries = 0;
+        } else {
+            ISOException.throwIt(Constants.SW_VERIFICATION_FAILED);
+        }
+
+        // Xoa buffer
+        Util.arrayFillNonAtomic(buffer, offset, plainLen, (byte) 0);
+    }
 
     // Ham giai ma Hybrid goi tin nhan vao (Dung cho Setup, Verify, Reset)
     // Input: [RSA_Encrypted_SessionKey (128 bytes)] + [AES_Encrypted_Data (16
@@ -200,38 +245,19 @@ public class SecurityManager {
     public void resetUserKey(byte[] buffer, short offset) {
         // buffer[offset] la AdminPIN
         // buffer[offset+6] la NewUserPIN
-        // LUY Y: buffer chinh la scratch! (do processResetUserKeyPacket truyen vao)
-        // Can than khong ghi de len NewUserPIN khi dang xu ly AdminPIN!
 
         short adminPinOff = offset;
         short newUserPinOff = (short) (offset + 6);
 
-        // 1. Xac thuc Admin PIN truoc
-        // Dan xuat AdminPIN + AdminSalt -> Key thu
-        // DUNG GHI VAO scratch[0..15] vi se de mat buffer input!
-        // Hay ghi vao scratch[64..79] (Vung Key Tam)
-        pbkdf2.derive(buffer, adminPinOff, (short) 6, adminSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS,
-                scratch, (short) 64);
-        tempKey.setKey(scratch, (short) 64);
-
-        // Giai ma encryptedAdminKey thu xem sao -> scratch[80..95] (Tranh buffer input)
-        // *** FIX IV: Luon dung IV 0 de dong bo ***
-        aesCipher.init(tempKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
-        aesCipher.doFinal(encryptedAdminKey, (short) 0, (short) 16, scratch, (short) 80);
-
-        // Hash ket qua giai ma -> scratch[96..127]
-        sha256.reset();
-        sha256.doFinal(scratch, (short) 80, (short) 16, scratch, (short) 96);
-
-        // So sanh voi AdminHash goc
-        if (Util.arrayCompare(scratch, (short) 96, adminKeyHash, (short) 0, (short) 32) != 0) {
+        // 1. Xac thuc Admin PIN truoc (Dung Helper moi)
+        if (!checkAdminPin(buffer, adminPinOff)) {
             // DEBUG: Bao loi Hash Admin khong khop
             short debugHash = (short) (0x6600 | (scratch[96] & 0xFF));
             ISOException.throwIt(debugHash);
         }
 
         // --- ADMIN DUNG -> TIEN HANH RESET USER KEY ---
-        // AdminKey Plain dang o scratch[80..95] (do buoc decrypt o tren)
+        // AdminKey Plain dang o scratch[80..95] (do checkAdminPin da giai ma va de do)
 
         JCSystem.beginTransaction();
         try {
@@ -405,6 +431,14 @@ public class SecurityManager {
     // =========================================================================
     // PHAN 2: TRAO DOI KHOA & DUONG TRUYEN (DATA IN TRANSIT)
     // =========================================================================
+
+    public short signData(byte[] input, short inOff, short inLen, byte[] sigBuff, short sigOff) {
+        // 1. Init Signature voi Private Key
+        rsaSignature.init(cardRsaKeyPair.getPrivate(), Signature.MODE_SIGN);
+
+        // 2. Ky du lieu
+        return rsaSignature.sign(input, inOff, inLen, sigBuff, sigOff);
+    }
 
     public RSAPublicKey getCardPublicKey() {
         return (RSAPublicKey) cardRsaKeyPair.getPublic();

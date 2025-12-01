@@ -12,6 +12,8 @@ public class Constants {
     public static final byte INS_CHANGE_PIN = (byte) 0x25; // Change PIN
     public static final byte INS_GET_INFO = (byte) 0x30;
     public static final byte INS_AUTH_GET_CARD_ID = (byte) 0x31; // Auth Step 1
+    public static final byte INS_AUTH_CHALLENGE = (byte) 0x32; // Auth Step 2: Challenge-Response
+    public static final byte INS_UNBLOCK_PIN = (byte) 0x26; // NEW: Unblock PIN
     public static final byte INS_UPDATE_INFO = (byte) 0x40;
     public static final byte INS_RESET_USER_KEY = (byte) 0x50;
     public static final byte INS_SET_APP_KEY = 0x24;

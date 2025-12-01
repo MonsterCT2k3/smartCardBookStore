@@ -21,7 +21,9 @@ public class BookstoreClientTest {
     private static final byte INS_VERIFY_PIN = (byte) 0x20;
     private static final byte INS_GET_PUBLIC_KEY = (byte) 0x22;
     private static final byte INS_AUTH_GET_CARD_ID = (byte) 0x31; // Auth Step 1
+    private static final byte INS_AUTH_CHALLENGE = (byte) 0x32; // Auth Step 2: Challenge-Response
     private static final byte INS_CHANGE_PIN = (byte) 0x25; // Change PIN
+    private static final byte INS_UNBLOCK_PIN = (byte) 0x26; // Unblock PIN
     private static final byte INS_RESET_PIN = (byte) 0x50;
     private static final byte INS_GET_INFO = (byte) 0x30;
 
@@ -61,7 +63,8 @@ public class BookstoreClientTest {
             System.out.println("6. Get User Info (Hybrid Encrypted)");
             System.out.println("7. Reset User PIN");
             System.out.println("8. Change PIN (User)");
-            System.out.println("9. Authenticate Card (Step 1: Get CardID)");
+            System.out.println("9. Authenticate Card (Challenge-Response)");
+            System.out.println("10. Unblock Card (Admin Only)");
             System.out.println("0. Exit");
             System.out.print("Choose option: ");
 
@@ -95,6 +98,9 @@ public class BookstoreClientTest {
                         break;
                     case "9":
                         authenticateUser();
+                        break;
+                    case "10":
+                        unblockCard();
                         break;
                     case "0":
                         System.out.println("Exiting...");
@@ -336,18 +342,20 @@ public class BookstoreClientTest {
 
     private static void authenticateUser() throws Exception {
         checkConnection();
-        // Can private key de decrypt response
+        // Can private key de decrypt response (cho buoc 1)
+        // Can public key de verify signature (cho buoc 2)
         if (appKeyPair == null) {
             System.out.println("Error: App KeyPair not available. Please run option 2 first.");
             return;
         }
+        checkPublicKey(); // Dam bao da co Card Public Key
 
-        System.out.println("Authenticating User - Step 1: Get CardID...");
+        System.out.println("\n--- STEP 1: IDENTIFICATION (Get Card ID) ---");
 
         // 1. Gui lenh (Response Expect: 128 RSA + 16 Data = 144)
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_AUTH_GET_CARD_ID, 0x00, 0x00, 144));
         if (r.getSW() != 0x9000) {
-            System.out.println("Failed. SW: " + Integer.toHexString(r.getSW()));
+            System.out.println("Failed Step 1. SW: " + Integer.toHexString(r.getSW()));
             return;
         }
 
@@ -357,13 +365,13 @@ public class BookstoreClientTest {
             return;
         }
 
-        // 2. Decrypt Session Key (RSA)
+        // Decrypt Session Key (RSA)
         byte[] encSessionKey = Arrays.copyOfRange(encData, 0, 128);
         Cipher rsaCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         rsaCipher.init(Cipher.DECRYPT_MODE, appKeyPair.getPrivate());
         byte[] sessionKeyBytes = rsaCipher.doFinal(encSessionKey);
 
-        // 3. Decrypt CardID (AES)
+        // Decrypt CardID (AES)
         byte[] encCardId = Arrays.copyOfRange(encData, 128, encData.length);
         SecretKey sessionKey = new SecretKeySpec(sessionKeyBytes, "AES");
         IvParameterSpec iv = new IvParameterSpec(new byte[16]);
@@ -373,7 +381,50 @@ public class BookstoreClientTest {
         byte[] cardIdBytes = aesCipher.doFinal(encCardId);
         String cardId = new String(cardIdBytes).trim();
 
-        System.out.println(">>> Received Card ID: " + cardId);
+        System.out.println(">>> Card ID Claimed: " + cardId);
+
+        System.out.println("\n--- STEP 2: AUTHENTICATION (Challenge-Response) ---");
+        // 1. Sinh Random Challenge (32 bytes)
+        byte[] challenge = new byte[32];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(challenge);
+        System.out.println("Challenge Generated: " + bytesToHex(challenge));
+
+        // 2. Gui Challenge xuong the (INS_AUTH_CHALLENGE)
+        // The se dung Private Key ky vao Challenge nay
+        System.out.println("Sending Challenge to Card...");
+        ResponseAPDU r2 = channel.transmit(new CommandAPDU(0x00, INS_AUTH_CHALLENGE, 0x00, 0x00, challenge));
+
+        if (r2.getSW() != 0x9000) {
+            System.out.println("Failed Step 2. SW: " + Integer.toHexString(r2.getSW()));
+            return;
+        }
+
+        byte[] signature = r2.getData();
+        System.out.println("Signature Received: " + bytesToHex(signature));
+
+        // 3. Verify Signature bang Card Public Key
+        System.out.println("Verifying Signature using Card Public Key...");
+        Signature sig = Signature.getInstance("SHA1withRSA"); // JavaCard ALG_RSA_SHA_PKCS1 thuong tuong duong
+                                                              // SHA1withRSA hoac SHA256withRSA tuy phien ban.
+        // Thu SHA1withRSA truoc vi nhieu the JavaCard cu mac dinh la SHA1.
+        // Tuy nhien, neu SecurityManager dung ALG_RSA_SHA_PKCS1 thi no la SHA-1.
+        // Neu muon SHA-256 thi phai la ALG_RSA_SHA_256_PKCS1.
+        // Code SecurityManager dang dung:
+        // Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false); -> Day la SHA-1!
+        // Update: Hay sua SecurityManager thanh SHA-256 cho an toan hon neu the ho tro.
+        // Nhung de an toan, client cu thu SHA1withRSA truoc.
+
+        sig.initVerify(cardPublicKey);
+        sig.update(challenge);
+
+        boolean isValid = sig.verify(signature);
+
+        if (isValid) {
+            System.out.println(">>> AUTHENTICATION SUCCESSFUL! Card is genuine.");
+        } else {
+            System.out.println(">>> AUTHENTICATION FAILED! Signature invalid.");
+        }
     }
 
     private static String bytesToHex(byte[] bytes) {
@@ -395,6 +446,26 @@ public class BookstoreClientTest {
 
         sendSecureCommand(INS_RESET_PIN, resetData);
         System.out.println("(Done. Try Verify with New PIN: " + DATA_NEW_PIN + ")");
+    }
+
+    private static void unblockCard() throws Exception {
+        checkConnection();
+        checkPublicKey();
+
+        System.out.println("Unblocking Card (Reset Try Counter)...");
+        System.out.print("Enter Admin PIN: ");
+        String adminPin = scanner.nextLine();
+
+        if (adminPin.length() != 6) {
+            System.out.println("Error: Admin PIN must be 6 characters.");
+            return;
+        }
+
+        byte[] payload = new byte[6];
+        System.arraycopy(adminPin.getBytes(), 0, payload, 0, 6);
+
+        sendSecureCommand(INS_UNBLOCK_PIN, payload);
+        System.out.println("(Try Verify with User PIN now)");
     }
 
     // --- HELPER METHODS ---
