@@ -189,9 +189,12 @@ public class BookstoreClientTest {
     private static void verifyPin() throws Exception {
         checkConnection();
         checkPublicKey();
+        System.out.println("Enter User PIN to Verify: ");
 
-        System.out.println("Verifying PIN: " + DATA_USER_PIN);
-        sendSecureCommand(INS_VERIFY_PIN, DATA_USER_PIN.getBytes());
+        String userPin = scanner.nextLine();
+
+        System.out.println("Verifying PIN: " + userPin);
+        sendSecureCommand(INS_VERIFY_PIN, userPin.getBytes());
     }
 
     private static void initUserDataExtended() throws Exception {
