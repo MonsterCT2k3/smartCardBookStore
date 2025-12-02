@@ -11,6 +11,7 @@ public class MainApplet extends Applet implements ExtendedLength {
 
     private SecurityManager secManager;
     private DataRepository repository;
+    private byte[] tempBufferRam; // Bo dem RAM cho data lon
 
     public static void install(byte[] bArray, short bOffset, byte bLength) {
         new MainApplet();
@@ -19,6 +20,11 @@ public class MainApplet extends Applet implements ExtendedLength {
     protected MainApplet() {
         secManager = new SecurityManager();
         repository = new DataRepository();
+
+        // Cap phat bo dem RAM (Transient ByteArray) de xu ly APDU lon
+        // Size 512 du chua 320 bytes du lieu
+        tempBufferRam = JCSystem.makeTransientByteArray((short) 512, JCSystem.CLEAR_ON_DESELECT);
+
         register();
     }
 
@@ -75,10 +81,10 @@ public class MainApplet extends Applet implements ExtendedLength {
             // --- NHOM 2: LOGIN ---
 
             case Constants.INS_VERIFY_PIN:
-                // Nhan goi Hybrid Encrypted PIN
-                // [RSA SessionKey] + [AES PIN]
+                // Nhan PIN Plaintext
+                // [PIN 6 bytes] (hoac 16 bytes do padding)
                 short dataLen = apdu.setIncomingAndReceive();
-                secManager.verifyPinHybrid(buffer, ISO7816.OFFSET_CDATA, dataLen);
+                secManager.verifyPin(buffer, ISO7816.OFFSET_CDATA, dataLen);
                 break;
 
             // --- NHOM 3: NGHIEP VU (CO MA HOA HYBRID) ---
@@ -114,8 +120,8 @@ public class MainApplet extends Applet implements ExtendedLength {
     }
 
     private void handleSetup(APDU apdu) {
-        // Giai doan Setup Secure
-        // Nhan goi tin ma hoa Hybrid chua [UserPIN (6)] + [AdminPIN (6)]
+        // Giai doan Setup (PLAINTEXT)
+        // Nhan [UserPIN (6)] + [AdminPIN (6)]
         byte[] buffer = apdu.getBuffer();
         short len = apdu.setIncomingAndReceive();
 
@@ -124,9 +130,11 @@ public class MainApplet extends Applet implements ExtendedLength {
     }
 
     private void handleChangePin(APDU apdu) {
+        // Nhan [OldPIN 6] + [NewPIN 6] (Plaintext)
         byte[] buffer = apdu.getBuffer();
         short len = apdu.setIncomingAndReceive();
-        secManager.processChangePinHybrid(buffer, ISO7816.OFFSET_CDATA, len);
+        // Goi ham changePin Plaintext
+        secManager.changePin(buffer, ISO7816.OFFSET_CDATA, len);
     }
 
     private void handleUnblockPin(APDU apdu) {
@@ -136,78 +144,89 @@ public class MainApplet extends Applet implements ExtendedLength {
     }
 
     private void handleResetUserKey(APDU apdu) {
-        // Lenh nay nhan goi tin Hybrid chua:
-        // [AdminPIN (6)] + [NewUserPIN (6)] = 12 bytes (sau giai ma AES)
+        // Nhan [AdminPIN (6)] + [NewUserPIN (6)] = 12 bytes (Plaintext)
         byte[] buffer = apdu.getBuffer();
         short len = apdu.setIncomingAndReceive();
 
-        // 1. Decrypt goi Hybrid truoc (Goi xuong SecManager de xu ly tron goi)
-        secManager.processResetUserKeyHybrid(buffer, ISO7816.OFFSET_CDATA, len);
+        // Goi ham xu ly Plaintext
+        secManager.processResetUserKey(buffer, ISO7816.OFFSET_CDATA, len);
     }
 
     private void handleInitData(APDU apdu) {
         byte[] buffer = apdu.getBuffer();
-
-        // Voi Extended APDU, ham nay nhan so luong byte thuc te dang co trong buffer
-        // RAM
+        short offset = 0;
+        // 1. Kiem tra do dai du kien (Lc)
+        // Voi Extended APDU, phai dung getIncomingLength() de lay full length
         short len = apdu.setIncomingAndReceive();
 
-        // 1. Check Auth
-        AESKey mk = secManager.getMasterKey();
+        // FIX: Copy data tu offset data thuc te (apdu.getOffsetCdata()) thay vi
+        // ISO7816.OFFSET_CDATA (5)
+        // Dieu nay tranh viec copy nham header neu dung extended APDU header
+        Util.arrayCopy(buffer, apdu.getOffsetCdata(), tempBufferRam, offset, len);
+        offset += len;
 
-        // 2. Parse Data
-        // Client gui: [CardID (16)] [Name (64)] [DOB (16)] [RegDate (16)] [AppPublicKey
-        // (128)]
-        // Tong: 240 bytes (KHONG co Image)
+        while (len > 0) {
+            len = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+            Util.arrayCopy(buffer, ISO7816.OFFSET_CDATA, tempBufferRam, offset, len);
+            offset += len;
+        }
 
-        if (len < (short) 240) {
+        // Expect: 320 bytes
+        if (offset < (short) 320) {
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
         }
 
-        short off = ISO7816.OFFSET_CDATA;
+        // 3. Parse Data tu tempBufferRam
+        // Structure: [CardID (16)] [Name (64)] [DOB (16)] [Phone (16)] [Address (64)]
+        // [RegDate (16)] [AppPublicKey (128)]
+
+        AESKey mk = secManager.getMasterKey();
+        short readOff = 0;
 
         // Write CardID
-        repository.write(Constants.OFF_CARD_ID, buffer, off, Constants.LEN_CARD_ID, mk);
-        off += Constants.LEN_CARD_ID;
+        repository.write(Constants.OFF_CARD_ID, tempBufferRam, readOff, Constants.LEN_CARD_ID, mk);
+        readOff += Constants.LEN_CARD_ID;
 
         // Write Name
-        repository.write(Constants.OFF_FULLNAME, buffer, off, Constants.LEN_FULLNAME, mk);
-        off += Constants.LEN_FULLNAME;
+        repository.write(Constants.OFF_FULLNAME, tempBufferRam, readOff, Constants.LEN_FULLNAME, mk);
+        readOff += Constants.LEN_FULLNAME;
 
         // Write DOB
-        repository.write(Constants.OFF_DOB, buffer, off, Constants.LEN_DOB, mk);
-        off += Constants.LEN_DOB;
+        repository.write(Constants.OFF_DOB, tempBufferRam, readOff, Constants.LEN_DOB, mk);
+        readOff += Constants.LEN_DOB;
+
+        // Write Phone (NEW)
+        repository.write(Constants.OFF_PHONE, tempBufferRam, readOff, Constants.LEN_PHONE, mk);
+        readOff += Constants.LEN_PHONE;
+
+        // Write Address (NEW)
+        repository.write(Constants.OFF_ADDRESS, tempBufferRam, readOff, Constants.LEN_ADDRESS, mk);
+        readOff += Constants.LEN_ADDRESS;
 
         // Write RegDate
-        repository.write(Constants.OFF_REG_DATE, buffer, off, Constants.LEN_REG_DATE, mk);
-        off += Constants.LEN_REG_DATE;
+        repository.write(Constants.OFF_REG_DATE, tempBufferRam, readOff, Constants.LEN_REG_DATE, mk);
+        readOff += Constants.LEN_REG_DATE;
 
         // Write App Public Key (128 bytes)
-        repository.write(Constants.OFF_APP_PUBLIC_KEY, buffer, off, Constants.LEN_APP_PUBLIC_KEY, mk);
+        repository.write(Constants.OFF_APP_PUBLIC_KEY, tempBufferRam, readOff, Constants.LEN_APP_PUBLIC_KEY, mk);
     }
 
     private void handleAuthGetCardId(APDU apdu) {
         byte[] buffer = apdu.getBuffer();
         AESKey mk = secManager.getMasterKey();
 
-        // 1. Load App Public Key
-        repository.read(Constants.OFF_APP_PUBLIC_KEY, Constants.LEN_APP_PUBLIC_KEY, buffer, (short) 0, mk);
-        secManager.loadAppPublicKey(buffer, (short) 0);
+        // --- REMOVED HYBRID ENCRYPTION ---
+        // Chi gui Plaintext CardID (16 bytes)
 
-        // 2. Chuan bi Response (RSA 128 + Data 16 = 144 bytes)
+        // 1. Chuan bi Response (16 bytes)
         apdu.setOutgoing();
-        apdu.setOutgoingLength((short) 144);
+        apdu.setOutgoingLength(Constants.LEN_CARD_ID);
 
-        // 3. Doc CardID (Plaintext) vao buffer tai offset 128 (sau RSA block)
-        repository.read(Constants.OFF_CARD_ID, Constants.LEN_CARD_ID, buffer, (short) 128, mk);
+        // 2. Doc CardID (Plaintext) vao buffer tai offset 0
+        repository.read(Constants.OFF_CARD_ID, Constants.LEN_CARD_ID, buffer, (short) 0, mk);
 
-        // 4. Ma hoa Hybrid
-        // Input: buffer[128..143] (16 bytes)
-        // Output: buffer[0..143]
-        secManager.encryptAndPackData(buffer, (short) 128, Constants.LEN_CARD_ID, buffer, (short) 0);
-
-        // 5. Gui
-        apdu.sendBytes((short) 0, (short) 144);
+        // 3. Gui
+        apdu.sendBytes((short) 0, Constants.LEN_CARD_ID);
     }
 
     private void handleAuthChallenge(APDU apdu) {
@@ -240,18 +259,17 @@ public class MainApplet extends Applet implements ExtendedLength {
         byte[] buffer = apdu.getBuffer();
         AESKey mk = secManager.getMasterKey();
 
-        // 1. Doc App Public Key & Load
-        repository.read(Constants.OFF_APP_PUBLIC_KEY, Constants.LEN_APP_PUBLIC_KEY, buffer, (short) 0, mk);
-        secManager.loadAppPublicKey(buffer, (short) 0);
+        // --- KHONG DUNG MA HOA HYBRID NUA, GUI PLAINTEXT ---
 
-        // 2. Chuan bi Response (RSA 128 + Data 112 = 240 bytes)
+        // 1. Chuan bi Response (Data 192 bytes)
+        // Data: CardID(16) + Name(64) + DOB(16) + Phone(16) + Address(64) + RegDate(16)
+        // = 192 bytes
         apdu.setOutgoing();
-        apdu.setOutgoingLength((short) 240);
+        apdu.setOutgoingLength((short) 192);
 
-        // 3. Doc toan bo Plaintext Data vao buffer (bat dau tu offset 128)
-        // De danh cho cho RSA Block (0-127)
-        short plainOff = 128;
+        short plainOff = 0; // Ghi truc tiep tu dau buffer
 
+        // Doc du lieu tu EEPROM (da giai ma bang MasterKey) va ghi thang vao buffer
         repository.read(Constants.OFF_CARD_ID, Constants.LEN_CARD_ID, buffer, plainOff, mk);
         plainOff += Constants.LEN_CARD_ID;
 
@@ -261,15 +279,16 @@ public class MainApplet extends Applet implements ExtendedLength {
         repository.read(Constants.OFF_DOB, Constants.LEN_DOB, buffer, plainOff, mk);
         plainOff += Constants.LEN_DOB;
 
+        repository.read(Constants.OFF_PHONE, Constants.LEN_PHONE, buffer, plainOff, mk);
+        plainOff += Constants.LEN_PHONE;
+
+        repository.read(Constants.OFF_ADDRESS, Constants.LEN_ADDRESS, buffer, plainOff, mk);
+        plainOff += Constants.LEN_ADDRESS;
+
         repository.read(Constants.OFF_REG_DATE, Constants.LEN_REG_DATE, buffer, plainOff, mk);
-        // plainOff luc nay la 240
+        // plainOff luc nay = 192
 
-        // 4. Ma hoa Hybrid (RSA + AES)
-        // Input: buffer[128..239] (112 bytes)
-        // Output: buffer[0..239] (RSA 128 + AES 112)
-        secManager.encryptAndPackData(buffer, (short) 128, (short) 112, buffer, (short) 0);
-
-        // 5. Gui toan bo
-        apdu.sendBytes((short) 0, (short) 240);
+        // 2. Gui toan bo
+        apdu.sendBytes((short) 0, (short) 192);
     }
 }

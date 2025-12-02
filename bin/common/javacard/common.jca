@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Mon Dec 01 14:49:13 ICT 2025
+// on Tue Dec 02 11:07:20 ICT 2025
 
 .package common {
 	.aid 0x11:0x22:0x33:0x44:0x55:0x0;
@@ -42,13 +42,11 @@
 			public static final short LEN_DOB = 16;		// S
 			public static final short OFF_PHONE = 96;		// S
 			public static final short LEN_PHONE = 16;		// S
-			public static final short OFF_REG_DATE = 112;		// S
+			public static final short OFF_ADDRESS = 112;		// S
+			public static final short LEN_ADDRESS = 64;		// S
+			public static final short OFF_REG_DATE = 176;		// S
 			public static final short LEN_REG_DATE = 16;		// S
-			public static final short OFF_POINTS = 128;		// S
-			public static final short LEN_POINTS = 16;		// S
-			public static final short OFF_IMAGE = 144;		// S
-			public static final short LEN_IMAGE = 1024;		// S
-			public static final short OFF_APP_PUBLIC_KEY = 1168;		// S
+			public static final short OFF_APP_PUBLIC_KEY = 192;		// S
 			public static final short LEN_APP_PUBLIC_KEY = 128;		// S
 			public static final short PBKDF2_ITERATIONS = 500;		// S
 			public static final byte PIN_MAX_TRIES = 3;		// B

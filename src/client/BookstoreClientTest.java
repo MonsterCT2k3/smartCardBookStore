@@ -36,6 +36,8 @@ public class BookstoreClientTest {
     private static final String DATA_CARD_ID = "SV00123456";
     private static final String DATA_NAME = "Nguyen Van A";
     private static final String DATA_DOB = "01011999";
+    private static final String DATA_PHONE = "0987654321";
+    private static final String DATA_ADDRESS = "144 Xuan Thuy, Cau Giay, HN";
     private static final String DATA_REG_DATE = "30112025";
 
     // --- State Variables ---
@@ -61,7 +63,7 @@ public class BookstoreClientTest {
             System.out.println("3. Setup Card (PIN: " + DATA_USER_PIN + ")");
             System.out.println("4. Verify User PIN");
             System.out.println("5. Init All Data (Text + App PubKey)");
-            System.out.println("6. Get User Info (Hybrid Encrypted)");
+            System.out.println("6. Get User Info (PLAINTEXT)");
             System.out.println("7. Reset User PIN");
             System.out.println("8. Change PIN (User)");
             System.out.println("9. Authenticate Card (Challenge-Response)");
@@ -183,7 +185,16 @@ public class BookstoreClientTest {
         System.arraycopy(DATA_USER_PIN.getBytes(), 0, setupData, 0, 6);
         System.arraycopy(DATA_ADMIN_PIN.getBytes(), 0, setupData, 6, 6);
 
-        sendSecureCommand(INS_SETUP_CARD, setupData);
+        // --- FIX: Send as PLAINTEXT, not Secure Command ---
+        System.out.println("Sending Setup Data (PLAINTEXT)...");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_SETUP_CARD, 0x00, 0x00, setupData));
+
+        System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> SUCCESS");
+        } else {
+            System.out.println(">>> FAILED");
+        }
     }
 
     private static void verifyPin() throws Exception {
@@ -193,8 +204,20 @@ public class BookstoreClientTest {
 
         String userPin = scanner.nextLine();
 
-        System.out.println("Verifying PIN: " + userPin);
-        sendSecureCommand(INS_VERIFY_PIN, userPin.getBytes());
+        System.out.println("Verifying PIN: " + userPin + " (PLAINTEXT)");
+
+        // --- FIX: Send PIN as PLAINTEXT ---
+        byte[] pinData = userPin.getBytes();
+        // Co the padding 0 neu can, nhung o day truyen raw
+
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_VERIFY_PIN, 0x00, 0x00, pinData));
+
+        System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> LOGIN SUCCESS");
+        } else {
+            System.out.println(">>> LOGIN FAILED");
+        }
     }
 
     private static void initUserDataExtended() throws Exception {
@@ -207,18 +230,30 @@ public class BookstoreClientTest {
 
         System.out.println("Initializing Data (Text + App PublicKey)...");
         System.out.println("Name: " + DATA_NAME);
+        System.out.println("Phone: " + DATA_PHONE);
+        System.out.println("Address: " + DATA_ADDRESS);
 
-        // Prepare Payload: 112 Text + 128 AppPubKey = 240 bytes
-        byte[] payload = new byte[240];
+        // Prepare Payload: 192 Text + 128 AppPubKey = 320 bytes
+        byte[] payload = new byte[320];
         int offset = 0;
 
-        // 1. Text Data (112 bytes)
+        // 1. Text Data (192 bytes)
+        // CardID (16)
         System.arraycopy(createFixedLengthData(DATA_CARD_ID, 16), 0, payload, offset, 16);
         offset += 16;
+        // Name (64)
         System.arraycopy(createFixedLengthData(DATA_NAME, 64), 0, payload, offset, 64);
         offset += 64;
+        // DOB (16)
         System.arraycopy(createFixedLengthData(DATA_DOB, 16), 0, payload, offset, 16);
         offset += 16;
+        // Phone (16)
+        System.arraycopy(createFixedLengthData(DATA_PHONE, 16), 0, payload, offset, 16);
+        offset += 16;
+        // Address (64)
+        System.arraycopy(createFixedLengthData(DATA_ADDRESS, 64), 0, payload, offset, 64);
+        offset += 64;
+        // RegDate (16)
         System.arraycopy(createFixedLengthData(DATA_REG_DATE, 16), 0, payload, offset, 16);
         offset += 16;
 
@@ -260,51 +295,33 @@ public class BookstoreClientTest {
 
         if (appKeyPair == null) {
             System.out.println("Error: App KeyPair not available. Please run option 2 first.");
-            return;
+            // return; // Van cho chay tiep vi gio khong dung Hybrid nua
         }
 
-        System.out.println("Getting Info from Card (Hybrid Encrypted)...");
+        System.out.println("Getting Info from Card (PLAINTEXT)...");
 
-        // Gui lenh GET_INFO (khong co data gui len)
-        // Le = 200 (Expected: RSA Block 128 + AES Data)
-        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_GET_INFO, 0x00, 0x00, 200));
+        // Gui lenh GET_INFO
+        // Le = 192 (Chi Data, bo RSA Block)
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_GET_INFO, 0x00, 0x00, 192));
 
         if (r.getSW() != 0x9000) {
             System.out.println("Failed. SW: " + Integer.toHexString(r.getSW()));
             return;
         }
 
-        byte[] encData = r.getData();
-        System.out.println("Received Encrypted Data Len: " + encData.length);
+        byte[] plainData = r.getData();
+        System.out.println("Received Data Len: " + plainData.length);
 
-        if (encData.length < 128) {
+        if (plainData.length < 192) {
             System.out.println("Error: Not enough data received.");
             return;
         }
 
-        // 1. Tach RSA Block (Session Key Encrypted)
-        byte[] encSessionKey = new byte[128];
-        System.arraycopy(encData, 0, encSessionKey, 0, 128);
+        // --- KHONG CAN GIAI MA HYBRID ---
+        // Parse truc tiep tu plainData
 
-        // 2. Giai ma Session Key bang App Private Key
-        Cipher rsaCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        rsaCipher.init(Cipher.DECRYPT_MODE, appKeyPair.getPrivate());
-        byte[] sessionKeyBytes = rsaCipher.doFinal(encSessionKey);
-
-        // 3. Tach AES Encrypted Data
-        int aesDataLen = encData.length - 128;
-        byte[] aesEncData = new byte[aesDataLen];
-        System.arraycopy(encData, 128, aesEncData, 0, aesDataLen);
-
-        // 4. Giai ma AES Data bang Session Key
-        SecretKey sessionKey = new javax.crypto.spec.SecretKeySpec(sessionKeyBytes, "AES");
-        IvParameterSpec iv = new IvParameterSpec(new byte[16]); // IV = 0
-        Cipher aesCipher = Cipher.getInstance("AES/CBC/NoPadding");
-        aesCipher.init(Cipher.DECRYPT_MODE, sessionKey, iv);
-        byte[] plainData = aesCipher.doFinal(aesEncData);
-
-        // 5. Parse Plaintext (112 bytes)
-        // [CardID 16] [Name 64] [DOB 16] [RegDate 16]
+        // Structure: [CardID 16] [Name 64] [DOB 16] [Phone 16] [Address 64] [RegDate
+        // 16]
         int offset = 0;
         String cardId = new String(Arrays.copyOfRange(plainData, offset, offset + 16)).trim();
         offset += 16;
@@ -315,15 +332,23 @@ public class BookstoreClientTest {
         String dob = new String(Arrays.copyOfRange(plainData, offset, offset + 16)).trim();
         offset += 16;
 
+        String phone = new String(Arrays.copyOfRange(plainData, offset, offset + 16)).trim();
+        offset += 16;
+
+        String address = new String(Arrays.copyOfRange(plainData, offset, offset + 64)).trim();
+        offset += 64;
+
         String regDate = new String(Arrays.copyOfRange(plainData, offset, offset + 16)).trim();
 
         System.out.println("--- User Info (Decrypted) ---");
         System.out.println("Card ID : " + cardId);
         System.out.println("Name    : " + name);
         System.out.println("DOB     : " + dob);
+        System.out.println("Phone   : " + phone);
+        System.out.println("Address : " + address);
         System.out.println("RegDate : " + regDate);
 
-        System.out.println("\n(Decrypted successfully using Hybrid Scheme!)");
+        System.out.println("\n(Success!)");
     }
 
     private static void changePin() throws Exception {
@@ -345,7 +370,16 @@ public class BookstoreClientTest {
         System.arraycopy(oldPin.getBytes(), 0, payload, 0, 6);
         System.arraycopy(newPin.getBytes(), 0, payload, 6, 6);
 
-        sendSecureCommand(INS_CHANGE_PIN, payload);
+        // --- FIX: Send Plaintext directly ---
+        System.out.println("Sending Change PIN Command (PLAINTEXT)...");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_CHANGE_PIN, 0x00, 0x00, payload));
+
+        System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> CHANGE PIN SUCCESS");
+        } else {
+            System.out.println(">>> CHANGE PIN FAILED");
+        }
     }
 
     private static void authenticateUser() throws Exception {
@@ -360,33 +394,21 @@ public class BookstoreClientTest {
 
         System.out.println("\n--- STEP 1: IDENTIFICATION (Get Card ID) ---");
 
-        // 1. Gui lenh (Response Expect: 128 RSA + 16 Data = 144)
-        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_AUTH_GET_CARD_ID, 0x00, 0x00, 144));
+        // --- FIX: Receive PLAINTEXT instead of Hybrid Encrypted ---
+        // Expect: 16 bytes CardID (Data length = 16)
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_AUTH_GET_CARD_ID, 0x00, 0x00, 16));
         if (r.getSW() != 0x9000) {
             System.out.println("Failed Step 1. SW: " + Integer.toHexString(r.getSW()));
             return;
         }
 
-        byte[] encData = r.getData();
-        if (encData.length < 128) {
+        byte[] cardIdBytes = r.getData();
+        if (cardIdBytes.length < 16) {
             System.out.println("Error: Invalid response length.");
             return;
         }
 
-        // Decrypt Session Key (RSA)
-        byte[] encSessionKey = Arrays.copyOfRange(encData, 0, 128);
-        Cipher rsaCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        rsaCipher.init(Cipher.DECRYPT_MODE, appKeyPair.getPrivate());
-        byte[] sessionKeyBytes = rsaCipher.doFinal(encSessionKey);
-
-        // Decrypt CardID (AES)
-        byte[] encCardId = Arrays.copyOfRange(encData, 128, encData.length);
-        SecretKey sessionKey = new SecretKeySpec(sessionKeyBytes, "AES");
-        IvParameterSpec iv = new IvParameterSpec(new byte[16]);
-        Cipher aesCipher = Cipher.getInstance("AES/CBC/NoPadding");
-        aesCipher.init(Cipher.DECRYPT_MODE, sessionKey, iv);
-
-        byte[] cardIdBytes = aesCipher.doFinal(encCardId);
+        // Truc tiep lay CardID tu response (Plaintext)
         String cardId = new String(cardIdBytes).trim();
 
         System.out.println(">>> Card ID Claimed: " + cardId);
@@ -414,7 +436,7 @@ public class BookstoreClientTest {
         // 3. Verify Signature bang Card Public Key
         System.out.println("Verifying Signature using Card Public Key...");
         Signature sig = Signature.getInstance("SHA1withRSA"); // JavaCard ALG_RSA_SHA_PKCS1 thuong tuong duong
-                                                              // SHA1withRSA hoac SHA256withRSA tuy phien ban.
+        // SHA1withRSA hoac SHA256withRSA tuy phien ban.
         // Thu SHA1withRSA truoc vi nhieu the JavaCard cu mac dinh la SHA1.
         // Tuy nhien, neu SecurityManager dung ALG_RSA_SHA_PKCS1 thi no la SHA-1.
         // Neu muon SHA-256 thi phai la ALG_RSA_SHA_256_PKCS1.
@@ -452,8 +474,16 @@ public class BookstoreClientTest {
         System.arraycopy(DATA_ADMIN_PIN.getBytes(), 0, resetData, 0, 6);
         System.arraycopy(DATA_NEW_PIN.getBytes(), 0, resetData, 6, 6);
 
-        sendSecureCommand(INS_RESET_PIN, resetData);
-        System.out.println("(Done. Try Verify with New PIN: " + DATA_NEW_PIN + ")");
+        // --- FIX: Send as PLAINTEXT ---
+        System.out.println("Sending Reset PIN Command (PLAINTEXT)...");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_RESET_PIN, 0x00, 0x00, resetData));
+
+        System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
+        if (r.getSW() == 0x9000) {
+            System.out.println("(Done. Try Verify with New PIN: " + DATA_NEW_PIN + ")");
+        } else {
+            System.out.println(">>> FAILED");
+        }
     }
 
     private static void unblockCard() throws Exception {

@@ -25,7 +25,7 @@ public class Constants {
 
     // --- CAU TRUC BO NHO DU LIEU (DATA MAP) ---
     // Tong dung luong bo nho danh cho User Data: 2KB
-    public static final short DATA_SIZE = (short) 2048; // Tang de chua App Public Key
+    public static final short DATA_SIZE = (short) 2048;
 
     // 1. Card ID (16 bytes)
     public static final short OFF_CARD_ID = (short) 0;
@@ -35,28 +35,24 @@ public class Constants {
     public static final short OFF_FULLNAME = (short) 16;
     public static final short LEN_FULLNAME = (short) 64;
 
-    // 3. Ngay sinh (16 bytes - DDMMYYYY + Padding) - NEW
+    // 3. Ngay sinh (16 bytes)
     public static final short OFF_DOB = (short) 80;
     public static final short LEN_DOB = (short) 16;
-    
-    // 4. So dien thoai (16 bytes) - Doi cho
+
+    // 4. So dien thoai (16 bytes)
     public static final short OFF_PHONE = (short) 96;
     public static final short LEN_PHONE = (short) 16;
     
-    // 5. Ngay dang ky (16 bytes - DDMMYYYY + Padding) - NEW
-    public static final short OFF_REG_DATE = (short) 112;
+    // 5. Dia chi (64 bytes)
+    public static final short OFF_ADDRESS = (short) 112;
+    public static final short LEN_ADDRESS = (short) 64;
+
+    // 6. Ngay dang ky (16 bytes)
+    public static final short OFF_REG_DATE = (short) 176;
     public static final short LEN_REG_DATE = (short) 16;
 
-    // 6. Diem tich luy (16 bytes) - Doi cho
-    public static final short OFF_POINTS = (short) 128;
-    public static final short LEN_POINTS = (short) 16;
-
-    // 7. Anh/Avatar (1024 bytes) - NEW
-    public static final short OFF_IMAGE = (short) 144;
-    public static final short LEN_IMAGE = (short) 1024;
-
-    // 8. App Public Key (128 bytes - RSA Modulus) - NEW
-    public static final short OFF_APP_PUBLIC_KEY = (short) 1168; // 144 + 1024
+    // 7. App Public Key (128 bytes)
+    public static final short OFF_APP_PUBLIC_KEY = (short) 192; 
     public static final short LEN_APP_PUBLIC_KEY = (short) 128;
 
     // --- SECURITY ---

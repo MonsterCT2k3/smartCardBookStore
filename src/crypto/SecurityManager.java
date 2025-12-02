@@ -107,13 +107,12 @@ public class SecurityManager {
         return Util.arrayCompare(scratch, (short) 96, adminKeyHash, (short) 0, (short) 32) == 0;
     }
 
-    // Ham Unblock Card (chi reset pinTries, khong doi PIN)
     public void processUnblockCard(byte[] buffer, short offset, short len) {
-        // 1. Giai ma Admin PIN tu goi tin Hybrid
-        short plainLen = decryptIncomingData(buffer, offset, len);
+        // --- REMOVED DECRYPT ---
+        // Nhan Plaintext Admin PIN (6 bytes)
 
         // Admin PIN = 6 bytes
-        if (plainLen < 6)
+        if (len < 6)
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
         // 2. Verify Admin PIN
@@ -124,8 +123,8 @@ public class SecurityManager {
             ISOException.throwIt(Constants.SW_VERIFICATION_FAILED);
         }
 
-        // Xoa buffer
-        Util.arrayFillNonAtomic(buffer, offset, plainLen, (byte) 0);
+        // Xoa buffer (khong can thiet neu chi doc, nhung cu lam cho an toan)
+        // Util.arrayFillNonAtomic(buffer, offset, len, (byte) 0);
     }
 
     // Ham giai ma Hybrid goi tin nhan vao (Dung cho Setup, Verify, Reset)
@@ -160,17 +159,13 @@ public class SecurityManager {
         return plainLen;
     }
 
-    // Setup the lan dau (Secure Setup): Nhan goi tin ma hoa Hybrid
-    // Sau khi giai ma: [UserPIN (6)] + [AdminPIN (6)]
+    // Setup the lan dau (Secure Setup): Nhan PLAINTEXT
+    // Input: [UserPIN (6)] + [AdminPIN (6)] = 12 bytes
     // Tu sinh UserKey va AdminKey ngau nhien
     public void setupCard(byte[] buffer, short offset, short len) {
-        // 1. Giai ma Hybrid truoc
-        // Luu y: Du lieu ro se duoc ghi de vao buffer tai vi tri offset
-        short plainLen = decryptIncomingData(buffer, offset, len);
-
-        // Kiem tra do dai: 6 bytes UserPIN + 6 bytes AdminPIN = 12 bytes
-        // Tuy nhien do padding AES nen plainLen co the la 16 bytes (block size)
-        if (plainLen < 12)
+        // --- REMOVED DECRYPT INCOMING DATA ---
+        // Du lieu da la Plaintext, do dai phai dung 12 bytes
+        if (len != 12)
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
         short userPinOff = offset;
@@ -297,6 +292,25 @@ public class SecurityManager {
         Util.arrayFillNonAtomic(scratch, (short) 0, (short) 128, (byte) 0);
     }
 
+    // Ham xac thuc PIN (Dau vao la PLAINTEXT)
+    // Input: [PIN 6 bytes] (hoac duoc pad thanh 16)
+    public void verifyPin(byte[] buffer, short offset, short len) {
+        if (pinTries >= Constants.PIN_MAX_TRIES)
+            ISOException.throwIt(Constants.SW_CARD_LOCKED);
+
+        // --- REMOVED DECRYPT ---
+
+        // Client gui: 6 bytes PIN. Len co the lon hon neu padding
+        if (len < 6)
+            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+
+        // 2. Goi ham verify noi bo voi PIN tran (lay 6 bytes thuc)
+        verifyPinInternal(buffer, offset, (short) 6);
+
+        // 3. Xoa ngay buffer chua PIN tran (Optional neu can secure memory, nhung day
+        // la RAM buffer cua APDU)
+    }
+
     // Ham xac thuc PIN (Dau vao la goi tin Hybrid)
     // Packet: [RSA 128 bytes] + [AES Encrypted PIN 16 bytes]
     public void verifyPinHybrid(byte[] buffer, short offset, short len) {
@@ -355,19 +369,30 @@ public class SecurityManager {
     // Xu ly goi tin Reset User Key (Ma hoa Hybrid)
     // Packet: [RSA 128 bytes] + [AES Encrypted (AdminPIN 6 + NewUserPIN 6 + Pad 4)
     // 16 bytes]
-    public void processResetUserKeyHybrid(byte[] buffer, short offset, short len) {
-        // 1. Giai ma Hybrid
-        short plainLen = decryptIncomingData(buffer, offset, len);
+    public void processResetUserKey(byte[] buffer, short offset, short len) {
+        // --- REMOVED DECRYPT ---
 
         // Tong data phai la 12 bytes (6 Admin + 6 User)
-        if (plainLen < 12)
+        if (len < 12)
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
         // 2. Goi ham resetUserKey voi du lieu da giai ma
         resetUserKey(buffer, offset);
 
         // 3. Xoa buffer nhay cam
-        Util.arrayFillNonAtomic(buffer, offset, plainLen, (byte) 0);
+        // Util.arrayFillNonAtomic(buffer, offset, plainLen, (byte) 0);
+    }
+
+    // Change PIN (Plaintext)
+    // Packet: [OldPIN 6] + [NewPIN 6]
+    public void changePin(byte[] buffer, short offset, short len) {
+        // --- REMOVED DECRYPT ---
+        if (len < 12)
+            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+
+        changePinInternal(buffer, offset);
+
+        // Xoa buffer (Optional)
     }
 
     // Xu ly Change PIN (Hybrid)
@@ -377,12 +402,13 @@ public class SecurityManager {
         if (plainLen < 12)
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
-        changePin(buffer, offset);
+        changePinInternal(buffer, offset);
 
         Util.arrayFillNonAtomic(buffer, offset, plainLen, (byte) 0);
     }
 
-    private void changePin(byte[] buffer, short offset) {
+    // Helper: Logic Change PIN (Input la Plaintext)
+    private void changePinInternal(byte[] buffer, short offset) {
         short oldPinOff = offset;
         short newPinOff = (short) (offset + 6);
 
