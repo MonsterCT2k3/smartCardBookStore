@@ -6,12 +6,12 @@ import javacard.security.*;
 import common.Constants;
 
 public class DataRepository {
-    
+
     private byte[] dataBlob; // Mang lon chua tat ca info (Encrypted)
     private Cipher aesCipher;
     private byte[] ivBuffer; // Buffer cho IV
     private byte[] tempBlock; // Buffer cho padding (16 bytes)
-    
+
     public DataRepository() {
         dataBlob = new byte[Constants.DATA_SIZE];
         aesCipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
@@ -42,13 +42,13 @@ public class DataRepository {
 
             if (remainder == 0) {
                 // Truong hop dep: Chia het cho 16 -> Ghi thang
-        aesCipher.doFinal(input, inOff, len, dataBlob, offset);
+                aesCipher.doFinal(input, inOff, len, dataBlob, offset);
             } else {
                 // Truong hop le: Encrypt phan chan truoc
                 if (mainLen > 0) {
                     aesCipher.update(input, inOff, mainLen, dataBlob, offset);
-    }
-    
+                }
+
                 // Xu ly phan le: Copy ra tempBlock va pad 0
                 Util.arrayCopy(input, (short) (inOff + mainLen), tempBlock, (short) 0, remainder);
                 Util.arrayFillNonAtomic(tempBlock, remainder, (short) (16 - remainder), (byte) 0);
@@ -61,7 +61,7 @@ public class DataRepository {
             JCSystem.abortTransaction();
             // ISOException.throwIt(ISO7816.SW_UNKNOWN);
             // Throw loi ro rang hon de debug neu can
-             ISOException.throwIt((short)0x6F00); 
+            ISOException.throwIt((short) 0x6F00);
         }
     }
 

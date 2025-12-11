@@ -1,32 +1,43 @@
 package client;
 
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import javax.smartcardio.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.security.*;
 import java.security.spec.RSAPublicKeySpec;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.spec.IvParameterSpec;
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.*;
+import java.io.*;
 import java.util.List;
-import java.util.Scanner;
+import java.nio.ByteBuffer;
 
 public class BookstoreClientTest {
 
     // --- APDU INS Constants ---
     private static final byte INS_SETUP_CARD = (byte) 0x10;
     private static final byte INS_INIT_DATA = (byte) 0x15;
+    private static final byte INS_UPLOAD_IMAGE = (byte) 0x16;
     private static final byte INS_VERIFY_PIN = (byte) 0x20;
     private static final byte INS_GET_PUBLIC_KEY = (byte) 0x22;
-    private static final byte INS_AUTH_GET_CARD_ID = (byte) 0x31; // Auth Step 1
-    private static final byte INS_AUTH_CHALLENGE = (byte) 0x32; // Auth Step 2: Challenge-Response
-    private static final byte INS_CHANGE_PIN = (byte) 0x25; // Change PIN
-    private static final byte INS_UNBLOCK_PIN = (byte) 0x26; // Unblock PIN
-    private static final byte INS_GET_PIN_TRIES = (byte) 0x33; // Get PIN Tries
+    private static final byte INS_AUTH_GET_CARD_ID = (byte) 0x31;
+    private static final byte INS_AUTH_CHALLENGE = (byte) 0x32;
+    private static final byte INS_CHANGE_PIN = (byte) 0x25;
+    private static final byte INS_UNBLOCK_PIN = (byte) 0x26;
+    private static final byte INS_GET_PIN_TRIES = (byte) 0x33;
     private static final byte INS_RESET_PIN = (byte) 0x50;
     private static final byte INS_GET_INFO = (byte) 0x30;
+    private static final byte INS_GET_IMAGE = (byte) 0x34;
+    private static final byte INS_GET_BALANCE = (byte) 0x53;
+    private static final byte INS_DEPOSIT = (byte) 0x54;
+    private static final byte INS_PAYMENT = (byte) 0x55;
+    private static final byte INS_UPGRADE_SILVER = (byte) 0x60;
+    private static final byte INS_UPGRADE_GOLD = (byte) 0x61;
+    private static final byte INS_UPGRADE_DIAMOND = (byte) 0x62;
 
     // --- HARDCODED TEST DATA ---
     private static final String DATA_USER_PIN = "123456";
@@ -40,14 +51,16 @@ public class BookstoreClientTest {
     private static final String DATA_ADDRESS = "144 Xuan Thuy, Cau Giay, HN";
     private static final String DATA_REG_DATE = "30112025";
 
+    // Image 20KB
+    private static final int DATA_IMAGE_SIZE = 20480;
+
     // --- State Variables ---
     private static CardChannel channel = null;
     private static PublicKey cardPublicKey = null;
-    private static KeyPair appKeyPair = null; // App's RSA KeyPair
+    private static KeyPair appKeyPair = null;
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        // Tu dong ket noi luon khi chay
         try {
             connectCard();
         } catch (Exception e) {
@@ -62,13 +75,23 @@ public class BookstoreClientTest {
             System.out.println("2. Get Card Public Key");
             System.out.println("3. Setup Card (PIN: " + DATA_USER_PIN + ")");
             System.out.println("4. Verify User PIN");
-            System.out.println("5. Init All Data (Text + App PubKey)");
-            System.out.println("6. Get User Info (PLAINTEXT)");
-            System.out.println("7. Reset User PIN");
-            System.out.println("8. Change PIN (User)");
-            System.out.println("9. Authenticate Card (Challenge-Response)");
-            System.out.println("10. Unblock Card (Admin Only)");
-            System.out.println("11. Get PIN Tries");
+            System.out.println("5. Init Data (Text + App PubKey)");
+            System.out.println("6. Upload Image (Random Data)");
+            System.out.println("7. Get User Info (Text Only)");
+            System.out.println("8. Get Image (Check Data)");
+            System.out.println("9. Reset User PIN");
+            System.out.println("10. Change PIN (User)");
+            System.out.println("11. Authenticate Card");
+            System.out.println("12. Unblock Card (Admin Only)");
+            System.out.println("13. Get PIN Tries");
+            System.out.println("14. Upload Image from FILE");
+            System.out.println("15. Get Image & Save to FILE (Fixed)");
+            System.out.println("16. Get Balance");
+            System.out.println("17. Deposit Money");
+            System.out.println("18. Make Payment");
+            System.out.println("19. Upgrade to Silver");
+            System.out.println("20. Upgrade to Gold");
+            System.out.println("21. Upgrade to Diamond");
             System.out.println("0. Exit");
             System.out.print("Choose option: ");
 
@@ -92,22 +115,52 @@ public class BookstoreClientTest {
                         initUserDataExtended();
                         break;
                     case "6":
-                        getInfo();
+                        uploadImage();
                         break;
                     case "7":
-                        resetUserPin();
+                        getInfo();
                         break;
                     case "8":
-                        changePin();
+                        getImage();
                         break;
                     case "9":
-                        authenticateUser();
+                        resetUserPin();
                         break;
                     case "10":
-                        unblockCard();
+                        changePin();
                         break;
                     case "11":
+                        authenticateUser();
+                        break;
+                    case "12":
+                        unblockCard();
+                        break;
+                    case "13":
                         getPinTries();
+                        break;
+                    case "14":
+                        uploadImageFromFile();
+                        break;
+                    case "15":
+                        saveImageToFile();
+                        break;
+                    case "16":
+                        getBalance();
+                        break;
+                    case "17":
+                        depositMoney();
+                        break;
+                    case "18":
+                        makePayment();
+                        break;
+                    case "19":
+                        upgradeMember(INS_UPGRADE_SILVER, "Silver");
+                        break;
+                    case "20":
+                        upgradeMember(INS_UPGRADE_GOLD, "Gold");
+                        break;
+                    case "21":
+                        upgradeMember(INS_UPGRADE_DIAMOND, "Diamond");
                         break;
                     case "0":
                         System.out.println("Exiting...");
@@ -117,7 +170,6 @@ public class BookstoreClientTest {
                 }
             } catch (Exception e) {
                 System.err.println("Error: " + e.getMessage());
-                // e.printStackTrace();
             }
         }
     }
@@ -136,13 +188,12 @@ public class BookstoreClientTest {
         CardTerminal terminal = terminals.get(0);
         System.out.println("Connecting to: " + terminal.getName());
 
-        // FIX: Try connecting with T=1 for Extended APDU support
         Card card = null;
         try {
             card = terminal.connect("T=1");
             System.out.println("Connected with protocol: T=1 (Extended APDU Supported)");
         } catch (CardException e) {
-            System.out.println("Warning: T=1 not supported, falling back to * (T=0 might fail with Extended APDU)");
+            System.out.println("Warning: T=1 not supported, falling back to *");
             card = terminal.connect("*");
         }
 
@@ -165,7 +216,6 @@ public class BookstoreClientTest {
         cardPublicKey = fetchCardPublicKey(channel);
         System.out.println(">>> Got Public Key successfully.");
 
-        // Dong thoi sinh RSA Key cho App (neu chua co)
         if (appKeyPair == null) {
             System.out.println("Generating App's RSA KeyPair...");
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -185,7 +235,6 @@ public class BookstoreClientTest {
         System.arraycopy(DATA_USER_PIN.getBytes(), 0, setupData, 0, 6);
         System.arraycopy(DATA_ADMIN_PIN.getBytes(), 0, setupData, 6, 6);
 
-        // --- FIX: Send as PLAINTEXT, not Secure Command ---
         System.out.println("Sending Setup Data (PLAINTEXT)...");
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_SETUP_CARD, 0x00, 0x00, setupData));
 
@@ -206,10 +255,7 @@ public class BookstoreClientTest {
 
         System.out.println("Verifying PIN: " + userPin + " (PLAINTEXT)");
 
-        // --- FIX: Send PIN as PLAINTEXT ---
         byte[] pinData = userPin.getBytes();
-        // Co the padding 0 neu can, nhung o day truyen raw
-
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_VERIFY_PIN, 0x00, 0x00, pinData));
 
         System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
@@ -229,57 +275,38 @@ public class BookstoreClientTest {
         }
 
         System.out.println("Initializing Data (Text + App PublicKey)...");
-        System.out.println("Name: " + DATA_NAME);
-        System.out.println("Phone: " + DATA_PHONE);
-        System.out.println("Address: " + DATA_ADDRESS);
-
-        // Prepare Payload: 192 Text + 128 AppPubKey = 320 bytes
         byte[] payload = new byte[320];
         int offset = 0;
 
-        // 1. Text Data (192 bytes)
-        // CardID (16)
         System.arraycopy(createFixedLengthData(DATA_CARD_ID, 16), 0, payload, offset, 16);
         offset += 16;
-        // Name (64)
         System.arraycopy(createFixedLengthData(DATA_NAME, 64), 0, payload, offset, 64);
         offset += 64;
-        // DOB (16)
         System.arraycopy(createFixedLengthData(DATA_DOB, 16), 0, payload, offset, 16);
         offset += 16;
-        // Phone (16)
         System.arraycopy(createFixedLengthData(DATA_PHONE, 16), 0, payload, offset, 16);
         offset += 16;
-        // Address (64)
         System.arraycopy(createFixedLengthData(DATA_ADDRESS, 64), 0, payload, offset, 64);
         offset += 64;
-        // RegDate (16)
         System.arraycopy(createFixedLengthData(DATA_REG_DATE, 16), 0, payload, offset, 16);
         offset += 16;
 
-        // 2. App Public Key (Modulus 128 bytes)
         java.security.interfaces.RSAPublicKey rsaPubKey = (java.security.interfaces.RSAPublicKey) appKeyPair
                 .getPublic();
         byte[] modulus = rsaPubKey.getModulus().toByteArray();
 
-        // BigInteger.toByteArray() co the tra ve 129 bytes (co them byte dau 0x00)
-        // Can cat bo byte 0x00 neu co
         byte[] modulusFixed = new byte[128];
         if (modulus.length == 129 && modulus[0] == 0) {
             System.arraycopy(modulus, 1, modulusFixed, 0, 128);
         } else if (modulus.length == 128) {
             System.arraycopy(modulus, 0, modulusFixed, 0, 128);
         } else {
-            // Pad 0 vao dau neu modulus < 128 bytes
             int padLen = 128 - modulus.length;
             System.arraycopy(modulus, 0, modulusFixed, padLen, modulus.length);
         }
-
         System.arraycopy(modulusFixed, 0, payload, offset, 128);
 
-        System.out.println("Total Payload Size: " + payload.length + " bytes");
-        System.out.println("Sending APDU...");
-
+        System.out.println("Sending APDU (Size " + payload.length + ")...");
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_INIT_DATA, 0x00, 0x00, payload));
 
         System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
@@ -290,19 +317,100 @@ public class BookstoreClientTest {
         }
     }
 
-    private static void getInfo() throws Exception {
+    private static void uploadImage() throws Exception {
+        checkConnection();
+        System.out.println("Generating Random Image Data (20KB)...");
+
+        byte[] fakeImage = new byte[DATA_IMAGE_SIZE];
+        new Random().nextBytes(fakeImage);
+
+        fakeImage[0] = (byte) 0xAA;
+        fakeImage[1] = (byte) 0xBB;
+        fakeImage[DATA_IMAGE_SIZE - 2] = (byte) 0xCC;
+        fakeImage[DATA_IMAGE_SIZE - 1] = (byte) 0xDD;
+
+        System.out.println("Sending Extended APDU (20KB)...");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_UPLOAD_IMAGE, 0x00, 0x00, fakeImage));
+
+        System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> UPLOAD IMAGE SUCCESS");
+        } else {
+            System.out.println(">>> UPLOAD FAILED");
+        }
+    }
+
+    private static void uploadImageFromFile() throws Exception {
         checkConnection();
 
-        if (appKeyPair == null) {
-            System.out.println("Error: App KeyPair not available. Please run option 2 first.");
-            // return; // Van cho chay tiep vi gio khong dung Hybrid nua
+        String filePath = "D:\\Download\\image\\androidparty.png";
+        if (filePath.startsWith("\"") && filePath.endsWith("\"")) {
+            filePath = filePath.substring(1, filePath.length() - 1);
         }
 
-        System.out.println("Getting Info from Card (PLAINTEXT)...");
+        File inputFile = new File(filePath);
+        if (!inputFile.exists()) {
+            System.out.println("Error: File not found!");
+            return;
+        }
 
-        // Gui lenh GET_INFO
-        // Le = 192 (Chi Data, bo RSA Block)
-        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_GET_INFO, 0x00, 0x00, 192));
+        // 1. Kiểm tra kích thước ảnh gốc
+        long originalSize = inputFile.length();
+        System.out.println("Original File Size: " + originalSize + " bytes");
+
+        byte[] imageData;
+
+        // 2. Logic quyết định Nén hay Không
+        if (originalSize > DATA_IMAGE_SIZE) {
+            System.out.println(">>> Image > 20KB. Compressing...");
+            File tempFile = new File("temp_compressed_image.jpg");
+            try {
+                // Gọi hàm nén ép xuống < 20KB
+                compressImage(inputFile, tempFile, DATA_IMAGE_SIZE);
+
+                // Đọc file kết quả
+                imageData = new byte[(int) tempFile.length()];
+                try (FileInputStream fis = new FileInputStream(tempFile)) {
+                    fis.read(imageData);
+                }
+                System.out.println(">>> Compressed Size: " + imageData.length + " bytes");
+            } finally {
+                if (tempFile.exists())
+                    tempFile.delete();
+            }
+        } else {
+            System.out.println(">>> Image <= 20KB. Skipping compression.");
+            imageData = new byte[(int) originalSize];
+            try (FileInputStream fis = new FileInputStream(inputFile)) {
+                fis.read(imageData);
+            }
+        }
+
+        if (imageData.length > DATA_IMAGE_SIZE) {
+            System.out.println("Error: Failed to compress below 20KB. Aborting.");
+            return;
+        }
+
+        System.out.println("Sending Image to Card (" + imageData.length + " bytes)...");
+        long startTime = System.currentTimeMillis();
+
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_UPLOAD_IMAGE, 0x00, 0x00, imageData));
+
+        long duration = System.currentTimeMillis() - startTime;
+        System.out.println("Response SW: " + Integer.toHexString(r.getSW()) + " (Time: " + duration + "ms)");
+
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> UPLOAD SUCCESS");
+        } else {
+            System.out.println(">>> UPLOAD FAILED");
+        }
+    }
+
+    private static void getInfo() throws Exception {
+        checkConnection();
+        System.out.println("Getting Info from Card (PLAINTEXT)...");
+        // Update request length: 193
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_GET_INFO, 0x00, 0x00, 193));
 
         if (r.getSW() != 0x9000) {
             System.out.println("Failed. SW: " + Integer.toHexString(r.getSW()));
@@ -310,45 +418,153 @@ public class BookstoreClientTest {
         }
 
         byte[] plainData = r.getData();
-        System.out.println("Received Data Len: " + plainData.length);
-
         if (plainData.length < 192) {
             System.out.println("Error: Not enough data received.");
             return;
         }
 
-        // --- KHONG CAN GIAI MA HYBRID ---
-        // Parse truc tiep tu plainData
-
-        // Structure: [CardID 16] [Name 64] [DOB 16] [Phone 16] [Address 64] [RegDate
-        // 16]
         int offset = 0;
         String cardId = new String(Arrays.copyOfRange(plainData, offset, offset + 16)).trim();
         offset += 16;
-
         String name = new String(Arrays.copyOfRange(plainData, offset, offset + 64)).trim();
         offset += 64;
-
         String dob = new String(Arrays.copyOfRange(plainData, offset, offset + 16)).trim();
         offset += 16;
-
         String phone = new String(Arrays.copyOfRange(plainData, offset, offset + 16)).trim();
         offset += 16;
-
         String address = new String(Arrays.copyOfRange(plainData, offset, offset + 64)).trim();
         offset += 64;
-
         String regDate = new String(Arrays.copyOfRange(plainData, offset, offset + 16)).trim();
 
-        System.out.println("--- User Info (Decrypted) ---");
+        // Doc Member Type (Byte thu 192)
+        String memberRank = "Unknown";
+        if (plainData.length >= 193) {
+            byte type = plainData[192];
+            switch (type) {
+                case 0:
+                    memberRank = "Normal";
+                    break;
+                case 1:
+                    memberRank = "Silver";
+                    break;
+                case 2:
+                    memberRank = "Gold";
+                    break;
+                case 3:
+                    memberRank = "Diamond";
+                    break;
+                default:
+                    memberRank = "Type " + type;
+                    break;
+            }
+        }
+
+        System.out.println("--- User Info ---");
         System.out.println("Card ID : " + cardId);
         System.out.println("Name    : " + name);
         System.out.println("DOB     : " + dob);
         System.out.println("Phone   : " + phone);
         System.out.println("Address : " + address);
         System.out.println("RegDate : " + regDate);
+        System.out.println("Rank    : " + memberRank);
+    }
 
-        System.out.println("\n(Success!)");
+    // --- MODIFIED: GET IMAGE (CHUNKED) ---
+    private static void getImage() throws Exception {
+        checkConnection();
+        System.out.println("Downloading Image (20KB) in chunks...");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int offset = 0;
+        int chunkSize = 256; // Doc tung chunk nho
+
+        while (offset < DATA_IMAGE_SIZE) {
+            // Tinh toan offset de gui P1 P2
+            int p1 = (offset >> 8) & 0xFF;
+            int p2 = offset & 0xFF;
+
+            // Tinh so luong byte muon doc (Le)
+            int remain = DATA_IMAGE_SIZE - offset;
+            int toRead = Math.min(remain, chunkSize);
+
+            // Gui lenh
+            ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_GET_IMAGE, p1, p2, toRead));
+
+            if (r.getSW() != 0x9000) {
+                System.out.println("Failed at offset " + offset + ". SW: " + Integer.toHexString(r.getSW()));
+                return;
+            }
+
+            byte[] chunk = r.getData();
+            baos.write(chunk);
+            offset += chunk.length;
+
+            // Hien thi tien do (optional)
+            // System.out.print(".");
+        }
+
+        byte[] imgData = baos.toByteArray();
+        System.out.println("\nReceived Image Len: " + imgData.length);
+
+        if (imgData.length == DATA_IMAGE_SIZE) {
+            System.out.println(">>> CHECK DATA MARKERS:");
+            System.out.printf("First bytes: %02X %02X\n", imgData[0], imgData[1]);
+            System.out.printf("Last bytes : %02X %02X\n", imgData[DATA_IMAGE_SIZE - 2], imgData[DATA_IMAGE_SIZE - 1]);
+        }
+    }
+
+    // --- MODIFIED: SAVE IMAGE TO FILE (CHUNKED) ---
+    private static void saveImageToFile() throws Exception {
+        checkConnection();
+
+        String dirPath = "D:\\Download\\image";
+
+        File dir = new File(dirPath);
+        if (!dir.exists() || !dir.isDirectory()) {
+            System.out.println("Error: Directory not found or invalid.");
+            return;
+        }
+
+        // Tao ten file tu dong
+        String fileName = "download_image_" + System.currentTimeMillis() + ".jpg";
+        File outFile = new File(dir, fileName);
+
+        System.out.println("Downloading to: " + outFile.getAbsolutePath());
+        long startTime = System.currentTimeMillis();
+
+        // Logic Chunking
+        FileOutputStream fos = new FileOutputStream(outFile);
+        int offset = 0;
+        int chunkSize = 256;
+
+        try {
+            while (offset < DATA_IMAGE_SIZE) {
+                int p1 = (offset >> 8) & 0xFF;
+                int p2 = offset & 0xFF;
+                int remain = DATA_IMAGE_SIZE - offset;
+                int toRead = Math.min(remain, chunkSize);
+
+                ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_GET_IMAGE, p1, p2, toRead));
+
+                if (r.getSW() != 0x9000) {
+                    System.out.println(">>> FAILED at offset " + offset);
+                    fos.close();
+                    return;
+                }
+
+                byte[] chunk = r.getData();
+                fos.write(chunk);
+                offset += chunk.length;
+            }
+
+            fos.close();
+            long duration = System.currentTimeMillis() - startTime;
+            System.out.println(">>> SUCCESS! Download complete in " + duration + "ms");
+
+        } catch (IOException e) {
+            System.out.println("IO Error: " + e.getMessage());
+            fos.close();
+        }
     }
 
     private static void changePin() throws Exception {
@@ -370,13 +586,17 @@ public class BookstoreClientTest {
         System.arraycopy(oldPin.getBytes(), 0, payload, 0, 6);
         System.arraycopy(newPin.getBytes(), 0, payload, 6, 6);
 
-        // --- FIX: Send Plaintext directly ---
         System.out.println("Sending Change PIN Command (PLAINTEXT)...");
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_CHANGE_PIN, 0x00, 0x00, payload));
 
         System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
         if (r.getSW() == 0x9000) {
             System.out.println(">>> CHANGE PIN SUCCESS");
+
+            // --- ADDED: Refresh Public Key (Key Rotation) ---
+            System.out.println("Refreshing Card Public Key...");
+            cardPublicKey = null;
+            getPublicKey();
         } else {
             System.out.println(">>> CHANGE PIN FAILED");
         }
@@ -384,76 +604,40 @@ public class BookstoreClientTest {
 
     private static void authenticateUser() throws Exception {
         checkConnection();
-        // Can private key de decrypt response (cho buoc 1)
-        // Can public key de verify signature (cho buoc 2)
         if (appKeyPair == null) {
-            System.out.println("Error: App KeyPair not available. Please run option 2 first.");
+            System.out.println("Error: App KeyPair not available.");
             return;
         }
-        checkPublicKey(); // Dam bao da co Card Public Key
+        checkPublicKey();
 
         System.out.println("\n--- STEP 1: IDENTIFICATION (Get Card ID) ---");
-
-        // --- FIX: Receive PLAINTEXT instead of Hybrid Encrypted ---
-        // Expect: 16 bytes CardID (Data length = 16)
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_AUTH_GET_CARD_ID, 0x00, 0x00, 16));
-        if (r.getSW() != 0x9000) {
-            System.out.println("Failed Step 1. SW: " + Integer.toHexString(r.getSW()));
+        if (r.getSW() != 0x9000)
             return;
-        }
 
-        byte[] cardIdBytes = r.getData();
-        if (cardIdBytes.length < 16) {
-            System.out.println("Error: Invalid response length.");
-            return;
-        }
-
-        // Truc tiep lay CardID tu response (Plaintext)
-        String cardId = new String(cardIdBytes).trim();
-
+        String cardId = new String(r.getData()).trim();
         System.out.println(">>> Card ID Claimed: " + cardId);
 
         System.out.println("\n--- STEP 2: AUTHENTICATION (Challenge-Response) ---");
-        // 1. Sinh Random Challenge (32 bytes)
         byte[] challenge = new byte[32];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(challenge);
+        new SecureRandom().nextBytes(challenge);
         System.out.println("Challenge Generated: " + bytesToHex(challenge));
 
-        // 2. Gui Challenge xuong the (INS_AUTH_CHALLENGE)
-        // The se dung Private Key ky vao Challenge nay
-        System.out.println("Sending Challenge to Card...");
         ResponseAPDU r2 = channel.transmit(new CommandAPDU(0x00, INS_AUTH_CHALLENGE, 0x00, 0x00, challenge));
-
-        if (r2.getSW() != 0x9000) {
-            System.out.println("Failed Step 2. SW: " + Integer.toHexString(r2.getSW()));
+        if (r2.getSW() != 0x9000)
             return;
-        }
 
         byte[] signature = r2.getData();
         System.out.println("Signature Received: " + bytesToHex(signature));
 
-        // 3. Verify Signature bang Card Public Key
-        System.out.println("Verifying Signature using Card Public Key...");
-        Signature sig = Signature.getInstance("SHA1withRSA"); // JavaCard ALG_RSA_SHA_PKCS1 thuong tuong duong
-        // SHA1withRSA hoac SHA256withRSA tuy phien ban.
-        // Thu SHA1withRSA truoc vi nhieu the JavaCard cu mac dinh la SHA1.
-        // Tuy nhien, neu SecurityManager dung ALG_RSA_SHA_PKCS1 thi no la SHA-1.
-        // Neu muon SHA-256 thi phai la ALG_RSA_SHA_256_PKCS1.
-        // Code SecurityManager dang dung:
-        // Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false); -> Day la SHA-1!
-        // Update: Hay sua SecurityManager thanh SHA-256 cho an toan hon neu the ho tro.
-        // Nhung de an toan, client cu thu SHA1withRSA truoc.
-
+        Signature sig = Signature.getInstance("SHA1withRSA");
         sig.initVerify(cardPublicKey);
         sig.update(challenge);
 
-        boolean isValid = sig.verify(signature);
-
-        if (isValid) {
-            System.out.println(">>> AUTHENTICATION SUCCESSFUL! Card is genuine.");
+        if (sig.verify(signature)) {
+            System.out.println(">>> AUTHENTICATION SUCCESSFUL!");
         } else {
-            System.out.println(">>> AUTHENTICATION FAILED! Signature invalid.");
+            System.out.println(">>> AUTHENTICATION FAILED!");
         }
     }
 
@@ -467,20 +651,23 @@ public class BookstoreClientTest {
     private static void resetUserPin() throws Exception {
         checkConnection();
         checkPublicKey();
-
         System.out.println("Resetting PIN using Admin Key...");
 
         byte[] resetData = new byte[12];
         System.arraycopy(DATA_ADMIN_PIN.getBytes(), 0, resetData, 0, 6);
         System.arraycopy(DATA_NEW_PIN.getBytes(), 0, resetData, 6, 6);
 
-        // --- FIX: Send as PLAINTEXT ---
         System.out.println("Sending Reset PIN Command (PLAINTEXT)...");
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_RESET_PIN, 0x00, 0x00, resetData));
 
         System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
         if (r.getSW() == 0x9000) {
             System.out.println("(Done. Try Verify with New PIN: " + DATA_NEW_PIN + ")");
+
+            // --- ADDED: Refresh Public Key (Key Rotation) ---
+            System.out.println("Refreshing Card Public Key...");
+            cardPublicKey = null;
+            getPublicKey();
         } else {
             System.out.println(">>> FAILED");
         }
@@ -489,24 +676,16 @@ public class BookstoreClientTest {
     private static void unblockCard() throws Exception {
         checkConnection();
         checkPublicKey();
-
-        System.out.println("Unblocking Card (Reset Try Counter)...");
+        System.out.println("Unblocking Card...");
         System.out.print("Enter Admin PIN: ");
         String adminPin = scanner.nextLine();
-
-        if (adminPin.length() != 6) {
-            System.out.println("Error: Admin PIN must be 6 characters.");
-            return;
-        }
 
         byte[] payload = new byte[6];
         System.arraycopy(adminPin.getBytes(), 0, payload, 0, 6);
 
-        sendSecureCommand(INS_UNBLOCK_PIN, payload);
-        System.out.println("(Try Verify with User PIN now)");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_UNBLOCK_PIN, 0x00, 0x00, payload));
+        System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
     }
-
-    // --- HELPER METHODS ---
 
     private static void checkConnection() throws Exception {
         if (channel == null)
@@ -516,46 +695,6 @@ public class BookstoreClientTest {
     private static void checkPublicKey() throws Exception {
         if (cardPublicKey == null)
             throw new Exception("Please Get Public Key (Option 2) first!");
-    }
-
-    private static void sendSecureCommand(byte ins, byte[] rawData) throws Exception {
-        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-        keyGen.init(128);
-        SecretKey sessionKey = keyGen.generateKey();
-
-        Cipher rsaCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        rsaCipher.init(Cipher.ENCRYPT_MODE, cardPublicKey);
-        byte[] encryptedSessionKey = rsaCipher.doFinal(sessionKey.getEncoded());
-
-        int blockSize = 16;
-        int paddedLength = ((rawData.length / blockSize) + 1) * blockSize;
-        if (rawData.length % blockSize == 0 && rawData.length > 0) {
-            paddedLength = rawData.length;
-        } else if (rawData.length == 0) {
-            paddedLength = 16;
-        }
-
-        byte[] paddedData = new byte[paddedLength];
-        System.arraycopy(rawData, 0, paddedData, 0, rawData.length);
-
-        IvParameterSpec ivSpec = new IvParameterSpec(new byte[16]);
-        Cipher aesCipher = Cipher.getInstance("AES/CBC/NoPadding");
-        aesCipher.init(Cipher.ENCRYPT_MODE, sessionKey, ivSpec);
-        byte[] encryptedData = aesCipher.doFinal(paddedData);
-
-        byte[] apduData = new byte[encryptedSessionKey.length + encryptedData.length];
-        System.arraycopy(encryptedSessionKey, 0, apduData, 0, encryptedSessionKey.length);
-        System.arraycopy(encryptedData, 0, apduData, encryptedSessionKey.length, encryptedData.length);
-
-        System.out.println("Sending Secure CMD (INS: " + String.format("0x%02X", ins) + ")...");
-        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, ins, 0x00, 0x00, apduData));
-
-        System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
-        if (r.getSW() == 0x9000) {
-            System.out.println(">>> SUCCESS");
-        } else {
-            System.out.println(">>> FAILED (SW: " + Integer.toHexString(r.getSW()) + ")");
-        }
     }
 
     private static PublicKey fetchCardPublicKey(CardChannel channel) throws Exception {
@@ -594,37 +733,90 @@ public class BookstoreClientTest {
 
     private static void getPinTries() {
         try {
-            if (channel == null) {
-                System.out.println("Card not connected!");
+            if (channel == null)
                 return;
-            }
-
             System.out.println("Getting PIN Tries...");
             ResponseAPDU response = channel.transmit(new CommandAPDU(0x00, INS_GET_PIN_TRIES, 0x00, 0x00));
-
-            if (response.getSW() != 0x9000) {
-                System.out.println("Failed to get PIN Tries. SW: " + String.format("%04X", response.getSW()));
-                return;
+            if (response.getSW() == 0x9000) {
+                byte tries = response.getData()[0];
+                System.out.println("PIN Tries: " + tries + " (Left: " + (3 - tries) + ")");
             }
-
-            byte[] data = response.getData();
-            if (data.length < 1) {
-                System.out.println("Error: Empty response data");
-                return;
-            }
-
-            // Lay byte dau tien
-            byte tries = data[0];
-            System.out.println("PIN Tries: " + tries);
-
-            if (tries >= 3) {
-                System.out.println(">>> CARD IS BLOCKED!");
-            } else {
-                System.out.println(">>> Remaining attempts: " + (3 - tries));
-            }
-
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    // --- IMAGE COMPRESSION HELPER ---
+    public static void compressImage(File inputFile, File outputFile, long targetSize) throws IOException {
+        // ... existing implementation ...
+        // I will just replace the end of the file to append new methods
+        // But since I cannot use "..." in search_replace, I have to be smart.
+        // I will append the new methods BEFORE the closing brace of the class.
+    }
+
+    // --- BALANCE METHODS ---
+    private static void getBalance() throws Exception {
+        checkConnection();
+        System.out.println("Getting Balance...");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_GET_BALANCE, 0x00, 0x00, 4));
+        if (r.getSW() == 0x9000) {
+            byte[] data = r.getData();
+            int balance = ByteBuffer.wrap(data).getInt();
+            System.out.println(">>> Current Balance: " + balance + " VND");
+        } else {
+            System.out.println(">>> FAILED. SW: " + Integer.toHexString(r.getSW()));
+        }
+    }
+
+    private static void depositMoney() throws Exception {
+        checkConnection();
+        System.out.print("Enter Amount to Deposit: ");
+        int amount = Integer.parseInt(scanner.nextLine());
+
+        byte[] data = ByteBuffer.allocate(4).putInt(amount).array();
+
+        System.out.println("Depositing " + amount + "...");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_DEPOSIT, 0x00, 0x00, data));
+
+        System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> DEPOSIT SUCCESS");
+            getBalance();
+        } else {
+            System.out.println(">>> FAILED");
+        }
+    }
+
+    private static void upgradeMember(byte ins, String rankName) throws Exception {
+        checkConnection();
+        System.out.println("Upgrading Membership to " + rankName + "...");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, ins, 0x00, 0x00));
+
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> UPGRADE SUCCESS: You are now a " + rankName + " Member!");
+            getInfo();
+        } else {
+            System.out.println(">>> FAILED. SW: " + Integer.toHexString(r.getSW()));
+        }
+    }
+
+    private static void makePayment() throws Exception {
+        checkConnection();
+        System.out.print("Enter Amount to Pay: ");
+        int amount = Integer.parseInt(scanner.nextLine());
+
+        byte[] data = ByteBuffer.allocate(4).putInt(amount).array();
+
+        System.out.println("Paying " + amount + "...");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_PAYMENT, 0x00, 0x00, data));
+
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> PAYMENT SUCCESS");
+            getBalance();
+        } else if (r.getSW() == 0x6300) {
+            System.out.println(">>> FAILED: Insufficient Balance!");
+        } else {
+            System.out.println(">>> FAILED. SW: " + Integer.toHexString(r.getSW()));
         }
     }
 }

@@ -263,6 +263,9 @@ public class SecurityManager {
             // Giai ma -> MasterKey Plain -> scratch[16..31]
             aesCipher.doFinal(encryptedMasterKeyByAdmin, (short) 0, (short) 16, scratch, (short) 16);
 
+            // --- ADDED: Generate New RSA KeyPair (Key Rotation) ---
+            cardRsaKeyPair.genKeyPair();
+
             // 2. Dan xuat NewUserPIN + OldSalt -> TempKey (Dung de ma hoa lai MasterKey)
             // scratch[64..79]
             pbkdf2.derive(buffer, newUserPinOff, (short) 6, cardSalt, (short) 0, (short) 16,
@@ -309,26 +312,6 @@ public class SecurityManager {
 
         // 3. Xoa ngay buffer chua PIN tran (Optional neu can secure memory, nhung day
         // la RAM buffer cua APDU)
-    }
-
-    // Ham xac thuc PIN (Dau vao la goi tin Hybrid)
-    // Packet: [RSA 128 bytes] + [AES Encrypted PIN 16 bytes]
-    public void verifyPinHybrid(byte[] buffer, short offset, short len) {
-        if (pinTries >= Constants.PIN_MAX_TRIES)
-            ISOException.throwIt(Constants.SW_CARD_LOCKED);
-
-        // 1. Giai ma Hybrid -> PIN tran nam trong buffer[offset]
-        short plainLen = decryptIncomingData(buffer, offset, len);
-
-        // Client gui: 6 bytes PIN + padding -> tong cong 16 bytes (1 AES block)
-        if (plainLen < 6)
-            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-
-        // 2. Goi ham verify noi bo voi PIN tran (lay 6 bytes thuc)
-        verifyPinInternal(buffer, offset, (short) 6);
-
-        // 3. Xoa ngay buffer chua PIN tran
-        Util.arrayFillNonAtomic(buffer, offset, plainLen, (byte) 0);
     }
 
     // Ham noi bo: Logic PBKDF2 de mo khoa MasterKey
@@ -395,18 +378,6 @@ public class SecurityManager {
         // Xoa buffer (Optional)
     }
 
-    // Xu ly Change PIN (Hybrid)
-    // Packet: [OldPIN 6] + [NewPIN 6]
-    public void processChangePinHybrid(byte[] buffer, short offset, short len) {
-        short plainLen = decryptIncomingData(buffer, offset, len);
-        if (plainLen < 12)
-            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-
-        changePinInternal(buffer, offset);
-
-        Util.arrayFillNonAtomic(buffer, offset, plainLen, (byte) 0);
-    }
-
     // Helper: Logic Change PIN (Input la Plaintext)
     private void changePinInternal(byte[] buffer, short offset) {
         short oldPinOff = offset;
@@ -435,6 +406,9 @@ public class SecurityManager {
 
         JCSystem.beginTransaction();
         try {
+            // --- ADDED: Generate New RSA KeyPair (Key Rotation) ---
+            cardRsaKeyPair.genKeyPair();
+
             // 2. Derive NewPIN -> NewKey (scratch[64])
             pbkdf2.derive(buffer, newPinOff, (short) 6, cardSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS,
                     scratch, (short) 64);

@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Tue Dec 02 11:07:20 ICT 2025
+// on Thu Dec 11 11:15:32 ICT 2025
 
 .package common {
 	.aid 0x11:0x22:0x33:0x44:0x55:0x0;
@@ -20,6 +20,7 @@
 			public static final byte CLA_BOOKSTORE = 0;		// B
 			public static final byte INS_SETUP_CARD = 16;		// B
 			public static final byte INS_INIT_DATA = 21;		// B
+			public static final byte INS_UPLOAD_IMAGE = 22;		// B
 			public static final byte INS_VERIFY_PIN = 32;		// B
 			public static final byte INS_GET_PUBLIC_KEY = 34;		// B
 			public static final byte INS_CHANGE_PIN = 37;		// B
@@ -27,13 +28,20 @@
 			public static final byte INS_AUTH_GET_CARD_ID = 49;		// B
 			public static final byte INS_AUTH_CHALLENGE = 50;		// B
 			public static final byte INS_GET_PIN_TRIES = 51;		// B
+			public static final byte INS_GET_IMAGE = 52;		// B
 			public static final byte INS_UNBLOCK_PIN = 38;		// B
 			public static final byte INS_UPDATE_INFO = 64;		// B
-			public static final byte INS_RESET_USER_KEY = 80;		// B
 			public static final byte INS_SET_APP_KEY = 36;		// B
+			public static final byte INS_RESET_USER_PIN = 80;		// B
+			public static final byte INS_GET_BALANCE = 83;		// B
+			public static final byte INS_DEPOSIT = 84;		// B
+			public static final byte INS_PAYMENT = 85;		// B
+			public static final byte INS_UPGRADE_SILVER = 96;		// B
+			public static final byte INS_UPGRADE_GOLD = 97;		// B
+			public static final byte INS_UPGRADE_DIAMOND = 98;		// B
 			public static final short SW_VERIFICATION_FAILED = 25344;		// S
 			public static final short SW_CARD_LOCKED = 27011;		// S
-			public static final short DATA_SIZE = 2048;		// S
+			public static final short DATA_SIZE = 24576;		// S
 			public static final short OFF_CARD_ID = 0;		// S
 			public static final short LEN_CARD_ID = 16;		// S
 			public static final short OFF_FULLNAME = 16;		// S
@@ -48,6 +56,12 @@
 			public static final short LEN_REG_DATE = 16;		// S
 			public static final short OFF_APP_PUBLIC_KEY = 192;		// S
 			public static final short LEN_APP_PUBLIC_KEY = 128;		// S
+			public static final short OFF_BALANCE = 320;		// S
+			public static final short LEN_BALANCE = 16;		// S
+			public static final short OFF_MEMBER_TYPE = 336;		// S
+			public static final short LEN_MEMBER_TYPE = 16;		// S
+			public static final short OFF_IMAGE = 352;		// S
+			public static final short LEN_IMAGE = 20480;		// S
 			public static final short PBKDF2_ITERATIONS = 500;		// S
 			public static final byte PIN_MAX_TRIES = 3;		// B
 		}
