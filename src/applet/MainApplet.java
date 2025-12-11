@@ -130,6 +130,9 @@ public class MainApplet extends Applet implements ExtendedLength {
             case Constants.INS_PAYMENT:
                 handlePayment(apdu);
                 break;
+            case Constants.INS_ADD_POINT:
+                handleAddPoint(apdu);
+                break;
 
             // --- NHOM 5: MEMBERSHIP ---
             case Constants.INS_UPGRADE_SILVER:
@@ -140,6 +143,17 @@ public class MainApplet extends Applet implements ExtendedLength {
                 break;
             case Constants.INS_UPGRADE_DIAMOND:
                 handleUpgradeMember(apdu, (byte) 3);
+                break;
+
+            // --- NHOM 6: BORROW BOOKS ---
+            case Constants.INS_BORROW_BOOK:
+                handleBorrowBook(apdu);
+                break;
+            case Constants.INS_RETURN_BOOK:
+                handleReturnBook(apdu);
+                break;
+            case Constants.INS_GET_BORROWED_BOOKS:
+                handleGetBorrowedBooks(apdu);
                 break;
 
             default:
@@ -217,9 +231,19 @@ public class MainApplet extends Applet implements ExtendedLength {
         Util.arrayFillNonAtomic(tempBufferRam, (short) 0, Constants.LEN_BALANCE, (byte) 0);
         repository.write(Constants.OFF_BALANCE, tempBufferRam, (short) 0, Constants.LEN_BALANCE, mk);
 
+        // --- INIT POINTS = 0 ---
+        // tempBufferRam van dang la 0
+        repository.write(Constants.OFF_POINTS, tempBufferRam, (short) 0, Constants.LEN_POINTS, mk);
+
         // --- INIT MEMBER TYPE = 0 ---
         // Van dung tempBufferRam dang chua toan 0
         repository.write(Constants.OFF_MEMBER_TYPE, tempBufferRam, (short) 0, Constants.LEN_MEMBER_TYPE, mk);
+
+        // --- INIT BORROW DATA (240 bytes = 0) ---
+        // tempBufferRam (512 bytes) dang chua toan 0 (do da fill o tren hoac mac dinh)
+        // De chac chan, ta fill lai 240 bytes
+        Util.arrayFillNonAtomic(tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, (byte) 0);
+        repository.write(Constants.OFF_BORROW_DATA, tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, mk);
     }
 
     private void handleAuthGetCardId(APDU apdu) {
@@ -274,7 +298,7 @@ public class MainApplet extends Applet implements ExtendedLength {
         plainOff += Constants.LEN_ADDRESS;
 
         repository.read(Constants.OFF_REG_DATE, Constants.LEN_REG_DATE, buffer, plainOff, mk);
-        
+
         // --- READ MEMBER TYPE ---
         // Doc 16 bytes vao tempBufferRam (de decrypt dung block)
         repository.read(Constants.OFF_MEMBER_TYPE, Constants.LEN_MEMBER_TYPE, tempBufferRam, (short) 0, mk);
@@ -284,15 +308,145 @@ public class MainApplet extends Applet implements ExtendedLength {
         apdu.sendBytes((short) 0, (short) 193);
     }
 
+    private void handleAddPoint(APDU apdu) {
+        byte[] buffer = apdu.getBuffer();
+        AESKey mk = secManager.getMasterKey();
+
+        // 1. Nhan so diem cong (4 bytes)
+        short len = apdu.setIncomingAndReceive();
+        if (len != 4)
+            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+
+        // 2. Doc Points hien tai -> tempBufferRam
+        repository.read(Constants.OFF_POINTS, Constants.LEN_POINTS, tempBufferRam, (short) 0, mk);
+
+        // 3. Cong diem: tempBufferRam + buffer
+        addBigNumber(tempBufferRam, (short) 0, buffer, apdu.getOffsetCdata(), (short) 4);
+
+        // 4. Ghi lai
+        repository.write(Constants.OFF_POINTS, tempBufferRam, (short) 0, Constants.LEN_POINTS, mk);
+    }
+
     private void handleUpgradeMember(APDU apdu, byte newType) {
         AESKey mk = secManager.getMasterKey();
-        
+
         // Chuan bi data: 1 byte type + 15 bytes 0 padding
         Util.arrayFillNonAtomic(tempBufferRam, (short) 0, Constants.LEN_MEMBER_TYPE, (byte) 0);
         tempBufferRam[0] = newType;
 
         // Ghi vao EEPROM
         repository.write(Constants.OFF_MEMBER_TYPE, tempBufferRam, (short) 0, Constants.LEN_MEMBER_TYPE, mk);
+    }
+
+    // --- BORROW BOOK HANDLERS ---
+
+    private void handleBorrowBook(APDU apdu) {
+        byte[] buffer = apdu.getBuffer();
+        AESKey mk = secManager.getMasterKey();
+
+        // 1. Nhan 16 bytes (7 ID + 8 Date + 1 Duration)
+        short len = apdu.setIncomingAndReceive();
+        if (len != 16)
+            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+
+        // 2. Doc toan bo Borrow Data (240 bytes) vao RAM
+        repository.read(Constants.OFF_BORROW_DATA, Constants.LEN_BORROW_DATA, tempBufferRam, (short) 0, mk);
+
+        // 3. Tim slot trong va Kiem tra trung ID
+        short freeSlotOffset = -1;
+        short slotSize = Constants.LEN_BOOK_SLOT; // 16
+
+        // Input Book ID nam o buffer[ISO7816.OFFSET_CDATA] (7 bytes)
+        short inputIdOffset = ISO7816.OFFSET_CDATA;
+
+        for (short i = 0; i < Constants.MAX_BORROWED_BOOKS; i++) {
+            short currentOffset = (short) (i * slotSize);
+
+            // Kiem tra slot co du lieu khong (Byte dau tien khac 0 la co data)
+            boolean isSlotUsed = false;
+            for (short j = 0; j < 7; j++) {
+                if (tempBufferRam[(short) (currentOffset + j)] != 0) {
+                    isSlotUsed = true;
+                    break;
+                }
+            }
+
+            if (isSlotUsed) {
+                // Check ID duplicate
+                if (Util.arrayCompare(tempBufferRam, currentOffset, buffer, inputIdOffset, (short) 6) == 0) {
+                    ISOException.throwIt(Constants.SW_VERIFICATION_FAILED); // Da muon roi
+                }
+            } else {
+                // Day la slot trong dau tien tim thay
+                if (freeSlotOffset == -1) {
+                    freeSlotOffset = currentOffset;
+                }
+            }
+        }
+
+        if (freeSlotOffset == -1) {
+            ISOException.throwIt(ISO7816.SW_FILE_FULL); // Het cho
+        }
+
+        // 4. Ghi data vao slot trong tim duoc tren RAM
+        Util.arrayCopy(buffer, inputIdOffset, tempBufferRam, freeSlotOffset, (short) 16);
+
+        // 5. Ghi nguoc RAM xuong EEPROM
+        repository.write(Constants.OFF_BORROW_DATA, tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, mk);
+    }
+
+    private void handleReturnBook(APDU apdu) {
+        byte[] buffer = apdu.getBuffer();
+        AESKey mk = secManager.getMasterKey();
+
+        // 1. Nhan Book ID (6 bytes)
+        short len = apdu.setIncomingAndReceive();
+        // Client co the gui 6 bytes hoac padding len 16 bytes deu duoc, ta chi lay 6
+        // bytes dau
+        if (len < 6)
+            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+
+        // 2. Doc data vao RAM
+        repository.read(Constants.OFF_BORROW_DATA, Constants.LEN_BORROW_DATA, tempBufferRam, (short) 0, mk);
+
+        // 3. Tim sach can tra
+        short targetOffset = -1;
+        short slotSize = Constants.LEN_BOOK_SLOT;
+        short inputIdOffset = ISO7816.OFFSET_CDATA;
+
+        for (short i = 0; i < Constants.MAX_BORROWED_BOOKS; i++) {
+            short currentOffset = (short) (i * slotSize);
+
+            // So sanh 6 bytes ID
+            if (Util.arrayCompare(tempBufferRam, currentOffset, buffer, inputIdOffset, (short) 6) == 0) {
+                targetOffset = currentOffset;
+                break;
+            }
+        }
+
+        if (targetOffset == -1) {
+            ISOException.throwIt(Constants.SW_VERIFICATION_FAILED); // Khong tim thay sach
+        }
+
+        // 4. Xoa slot (Ghi de = 0)
+        Util.arrayFillNonAtomic(tempBufferRam, targetOffset, slotSize, (byte) 0);
+
+        // 5. Update EEPROM
+        repository.write(Constants.OFF_BORROW_DATA, tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, mk);
+    }
+
+    private void handleGetBorrowedBooks(APDU apdu) {
+        byte[] buffer = apdu.getBuffer();
+        AESKey mk = secManager.getMasterKey();
+
+        apdu.setOutgoing();
+        apdu.setOutgoingLength(Constants.LEN_BORROW_DATA); // 240 bytes
+
+        // Doc data vao buffer
+        repository.read(Constants.OFF_BORROW_DATA, Constants.LEN_BORROW_DATA, buffer, (short) 0, mk);
+
+        // Gui ve client
+        apdu.sendBytes((short) 0, Constants.LEN_BORROW_DATA);
     }
 
     private void handleUploadImage(APDU apdu) {
@@ -384,13 +538,18 @@ public class MainApplet extends Applet implements ExtendedLength {
         AESKey mk = secManager.getMasterKey();
 
         apdu.setOutgoing();
-        apdu.setOutgoingLength((short) 4); // Client chi can 4 bytes
+        apdu.setOutgoingLength((short) 8); // Client can 4 bytes Balance + 4 bytes Points
 
-        // Doc full 16 bytes vao buffer
-        repository.read(Constants.OFF_BALANCE, Constants.LEN_BALANCE, buffer, (short) 0, mk);
+        // 1. Doc Balance (16 bytes) -> buffer[0..3]
+        repository.read(Constants.OFF_BALANCE, Constants.LEN_BALANCE, tempBufferRam, (short) 0, mk);
+        Util.arrayCopy(tempBufferRam, (short) 0, buffer, (short) 0, (short) 4);
 
-        // Chi gui 4 bytes dau tien
-        apdu.sendBytes((short) 0, (short) 4);
+        // 2. Doc Points (16 bytes) -> buffer[4..7]
+        repository.read(Constants.OFF_POINTS, Constants.LEN_POINTS, tempBufferRam, (short) 0, mk);
+        Util.arrayCopy(tempBufferRam, (short) 0, buffer, (short) 4, (short) 4);
+
+        // Gui 8 bytes
+        apdu.sendBytes((short) 0, (short) 8);
     }
 
     private void handleDeposit(APDU apdu) {

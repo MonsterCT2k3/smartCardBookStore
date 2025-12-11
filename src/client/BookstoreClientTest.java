@@ -38,6 +38,10 @@ public class BookstoreClientTest {
     private static final byte INS_UPGRADE_SILVER = (byte) 0x60;
     private static final byte INS_UPGRADE_GOLD = (byte) 0x61;
     private static final byte INS_UPGRADE_DIAMOND = (byte) 0x62;
+    private static final byte INS_BORROW_BOOK = (byte) 0x56;
+    private static final byte INS_RETURN_BOOK = (byte) 0x57;
+    private static final byte INS_GET_BORROWED_BOOKS = (byte) 0x58;
+    private static final byte INS_ADD_POINT = (byte) 0x59;
 
     // --- HARDCODED TEST DATA ---
     private static final String DATA_USER_PIN = "123456";
@@ -92,6 +96,10 @@ public class BookstoreClientTest {
             System.out.println("19. Upgrade to Silver");
             System.out.println("20. Upgrade to Gold");
             System.out.println("21. Upgrade to Diamond");
+            System.out.println("22. Borrow Book");
+            System.out.println("23. Return Book");
+            System.out.println("24. My Bookshelf");
+            System.out.println("25. Add Points");
             System.out.println("0. Exit");
             System.out.print("Choose option: ");
 
@@ -161,6 +169,18 @@ public class BookstoreClientTest {
                         break;
                     case "21":
                         upgradeMember(INS_UPGRADE_DIAMOND, "Diamond");
+                        break;
+                    case "22":
+                        borrowBook();
+                        break;
+                    case "23":
+                        returnBook();
+                        break;
+                    case "24":
+                        getMyBooks();
+                        break;
+                    case "25":
+                        addPoints();
                         break;
                     case "0":
                         System.out.println("Exiting...");
@@ -757,12 +777,20 @@ public class BookstoreClientTest {
     // --- BALANCE METHODS ---
     private static void getBalance() throws Exception {
         checkConnection();
-        System.out.println("Getting Balance...");
-        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_GET_BALANCE, 0x00, 0x00, 4));
+        System.out.println("Getting Balance & Points...");
+        // Expect 8 bytes: 4 bytes Balance + 4 bytes Points
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_GET_BALANCE, 0x00, 0x00, 8));
         if (r.getSW() == 0x9000) {
             byte[] data = r.getData();
-            int balance = ByteBuffer.wrap(data).getInt();
+            if (data.length < 8) {
+                System.out.println("Error: Not enough data.");
+                return;
+            }
+            int balance = ByteBuffer.wrap(data, 0, 4).getInt();
+            int points = ByteBuffer.wrap(data, 4, 4).getInt();
+
             System.out.println(">>> Current Balance: " + balance + " VND");
+            System.out.println(">>> Reward Points  : " + points);
         } else {
             System.out.println(">>> FAILED. SW: " + Integer.toHexString(r.getSW()));
         }
@@ -797,6 +825,157 @@ public class BookstoreClientTest {
             getInfo();
         } else {
             System.out.println(">>> FAILED. SW: " + Integer.toHexString(r.getSW()));
+        }
+    }
+
+    // --- BOOK BORROWING ---
+
+    private static void borrowBook() throws Exception {
+        checkConnection();
+        // Database sach gia lap
+        System.out.println("\n--- Available Books ---");
+        System.out.println("101. Java Programming (ID: 101)");
+        System.out.println("102. Smart Card Security (ID: 102)");
+        System.out.println("103. Algorithms (ID: 103)");
+        System.out.println("104. Database Systems (ID: 104)");
+        System.out.println("105. Network Security (ID: 105)");
+
+        System.out.print("Enter Book ID to Borrow: ");
+        String bookIdStr = scanner.nextLine();
+
+        byte[] bookId = new byte[6]; // ID 6 bytes
+        byte[] inputId = bookIdStr.getBytes();
+        if (inputId.length > 6) {
+            System.out.println("ID too long!");
+            return;
+        }
+        Arrays.fill(bookId, (byte) 0);
+        System.arraycopy(inputId, 0, bookId, 0, inputId.length);
+
+        System.out.print("Enter Borrow Date (DDMMYYYY): ");
+        String date = scanner.nextLine();
+        if (date.length() != 8) {
+            System.out.println("Invalid Date Format!");
+            return;
+        }
+
+        System.out.print("Enter Duration (days): ");
+        try {
+            int duration = Integer.parseInt(scanner.nextLine());
+            if (duration > 255)
+                duration = 255;
+
+            System.out.print("Enter Book Type (1=promotion, 0 = normal): ");
+            int type = Integer.parseInt(scanner.nextLine());
+            if (type > 255)
+                type = 255;
+
+            // Build Payload: 6 ID + 8 Date + 1 Duration + 1 Type = 16 bytes
+            byte[] payload = new byte[16];
+            System.arraycopy(bookId, 0, payload, 0, 6);
+            System.arraycopy(date.getBytes(), 0, payload, 6, 8);
+            payload[14] = (byte) duration;
+            payload[15] = (byte) type;
+
+            System.out.println("Sending Borrow Request...");
+            ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_BORROW_BOOK, 0x00, 0x00, payload));
+
+            if (r.getSW() == 0x9000) {
+                System.out.println(">>> BORROW SUCCESS!");
+            } else if (r.getSW() == 0x6300) {
+                System.out.println(">>> FAILED: Book already borrowed or Invalid.");
+            } else if (r.getSW() == 0x6A84) { // SW_FILE_FULL
+                System.out.println(">>> FAILED: Max books reached (15).");
+            } else {
+                System.out.println(">>> FAILED. SW: " + Integer.toHexString(r.getSW()));
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid duration!");
+        }
+    }
+
+    private static void returnBook() throws Exception {
+        checkConnection();
+        System.out.print("Enter Book ID to Return: ");
+        String bookIdStr = scanner.nextLine();
+
+        byte[] bookId = new byte[6]; // ID 6 bytes
+        byte[] inputId = bookIdStr.getBytes();
+        // Fill 0 padding for safety match
+        Arrays.fill(bookId, (byte) 0);
+        if (inputId.length <= 6) {
+            System.arraycopy(inputId, 0, bookId, 0, inputId.length);
+        }
+
+        System.out.println("Returning Book...");
+        // Send 6 bytes ID (or full 16 bytes padded is also fine, Applet handles both
+        // but prefers 6 minimum)
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_RETURN_BOOK, 0x00, 0x00, bookId));
+
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> RETURN SUCCESS!");
+        } else {
+            System.out.println(">>> FAILED (Book not found?). SW: " + Integer.toHexString(r.getSW()));
+        }
+    }
+
+    private static void getMyBooks() throws Exception {
+        checkConnection();
+        System.out.println("Fetching My Bookshelf...");
+
+        // 15 slots * 16 bytes = 240 bytes
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_GET_BORROWED_BOOKS, 0x00, 0x00, 240));
+
+        if (r.getSW() != 0x9000) {
+            System.out.println("Failed. SW: " + Integer.toHexString(r.getSW()));
+            return;
+        }
+
+        byte[] data = r.getData();
+        int count = 0;
+        System.out.println("\n--- MY BORROWED BOOKS ---");
+        System.out.println(String.format("%-10s | %-12s | %-8s | %-5s", "ID", "BorrowDate", "Duration", "Type"));
+        System.out.println("---------------------------------------------------------");
+
+        for (int i = 0; i < 15; i++) {
+            int offset = i * 16;
+            // Check byte dau tien cua ID
+            if (data[offset] != 0) {
+                // Parse ID (6 bytes)
+                String id = new String(data, offset, 6).trim();
+                // Parse Date (8 bytes) at offset + 6
+                String date = new String(data, offset + 6, 8);
+                // Parse Duration at offset + 14
+                int duration = data[offset + 14] & 0xFF;
+                // Parse Type at offset + 15
+                int type = data[offset + 15] & 0xFF;
+
+                System.out.println(String.format("%-10s | %-12s | %-8d | %-5d", id, date, duration, type));
+                count++;
+            }
+        }
+
+        if (count == 0) {
+            System.out.println("(Empty)");
+        }
+    }
+
+    private static void addPoints() throws Exception {
+        checkConnection();
+        System.out.print("Enter Points to Add: ");
+        int points = Integer.parseInt(scanner.nextLine());
+
+        byte[] data = ByteBuffer.allocate(4).putInt(points).array();
+
+        System.out.println("Adding " + points + " points...");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_ADD_POINT, 0x00, 0x00, data));
+
+        System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> ADD POINTS SUCCESS");
+            getBalance();
+        } else {
+            System.out.println(">>> FAILED");
         }
     }
 

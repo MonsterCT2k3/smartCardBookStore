@@ -26,10 +26,15 @@ public class Constants {
     public static final byte INS_DEPOSIT = (byte) 0x54;
     public static final byte INS_PAYMENT = (byte) 0x55;
 
-    // --- INS MEMBERSHIP ---
+    // --- INS MEMBERSHIP & BORROW ---
     public static final byte INS_UPGRADE_SILVER = (byte) 0x60;
     public static final byte INS_UPGRADE_GOLD = (byte) 0x61;
     public static final byte INS_UPGRADE_DIAMOND = (byte) 0x62;
+
+    public static final byte INS_BORROW_BOOK = (byte) 0x56;
+    public static final byte INS_RETURN_BOOK = (byte) 0x57;
+    public static final byte INS_GET_BORROWED_BOOKS = (byte) 0x58;
+    public static final byte INS_ADD_POINT = (byte) 0x59;
 
     // --- ERROR CODES ---
     public static final short SW_VERIFICATION_FAILED = (short) 0x6300;
@@ -73,15 +78,27 @@ public class Constants {
     public static final short OFF_BALANCE = (short) 320;
     public static final short LEN_BALANCE = (short) 16;
 
-    // 9. Member Type (1 Byte, nhung de tron block AES ta dung 16 bytes hoac 1 byte neu chap nhan padding rieng)
-    // De don gian va nhat quan, ta luu 16 bytes (1 byte type + 15 bytes padding)
-    // Offset = 320 + 16 = 336
-    public static final short OFF_MEMBER_TYPE = (short) 336;
+    // 9. Points (Diem tich luy) - Luu 16 bytes (4 bytes so + 12 bytes padding)
+    public static final short OFF_POINTS = (short) 336;
+    public static final short LEN_POINTS = (short) 16;
+
+    // 10. Member Type (16 bytes)
+    // Offset = 336 + 16 = 352
+    public static final short OFF_MEMBER_TYPE = (short) 352;
     public static final short LEN_MEMBER_TYPE = (short) 16;
 
-    // 10. Image (20480 bytes = 20KB)
-    // Offset = 336 + 16 = 352
-    public static final short OFF_IMAGE = (short) 352;
+    // 11. Borrowed Books Data (Max 15 books)
+    // Moi slot 16 bytes: 7 (ID) + 8 (Date) + 1 (Duration)
+    // Total len = 15 * 16 = 240 bytes
+    // Offset = 352 + 16 = 368
+    public static final short OFF_BORROW_DATA = (short) 368;
+    public static final short LEN_BORROW_DATA = (short) 240;
+    public static final byte MAX_BORROWED_BOOKS = (byte) 15;
+    public static final byte LEN_BOOK_SLOT = (byte) 16;
+
+    // 12. Image (20480 bytes = 20KB)
+    // Offset = 368 + 240 = 608
+    public static final short OFF_IMAGE = (short) 608;
     public static final short LEN_IMAGE = (short) 20480;
 
     // --- SECURITY ---

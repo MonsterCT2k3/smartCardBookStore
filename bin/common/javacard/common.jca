@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Thu Dec 11 11:15:32 ICT 2025
+// on Thu Dec 11 16:31:46 ICT 2025
 
 .package common {
 	.aid 0x11:0x22:0x33:0x44:0x55:0x0;
@@ -39,6 +39,10 @@
 			public static final byte INS_UPGRADE_SILVER = 96;		// B
 			public static final byte INS_UPGRADE_GOLD = 97;		// B
 			public static final byte INS_UPGRADE_DIAMOND = 98;		// B
+			public static final byte INS_BORROW_BOOK = 86;		// B
+			public static final byte INS_RETURN_BOOK = 87;		// B
+			public static final byte INS_GET_BORROWED_BOOKS = 88;		// B
+			public static final byte INS_ADD_POINT = 89;		// B
 			public static final short SW_VERIFICATION_FAILED = 25344;		// S
 			public static final short SW_CARD_LOCKED = 27011;		// S
 			public static final short DATA_SIZE = 24576;		// S
@@ -58,9 +62,15 @@
 			public static final short LEN_APP_PUBLIC_KEY = 128;		// S
 			public static final short OFF_BALANCE = 320;		// S
 			public static final short LEN_BALANCE = 16;		// S
-			public static final short OFF_MEMBER_TYPE = 336;		// S
+			public static final short OFF_POINTS = 336;		// S
+			public static final short LEN_POINTS = 16;		// S
+			public static final short OFF_MEMBER_TYPE = 352;		// S
 			public static final short LEN_MEMBER_TYPE = 16;		// S
-			public static final short OFF_IMAGE = 352;		// S
+			public static final short OFF_BORROW_DATA = 368;		// S
+			public static final short LEN_BORROW_DATA = 240;		// S
+			public static final byte MAX_BORROWED_BOOKS = 15;		// B
+			public static final byte LEN_BOOK_SLOT = 16;		// B
+			public static final short OFF_IMAGE = 608;		// S
 			public static final short LEN_IMAGE = 20480;		// S
 			public static final short PBKDF2_ITERATIONS = 500;		// S
 			public static final byte PIN_MAX_TRIES = 3;		// B
