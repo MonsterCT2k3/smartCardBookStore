@@ -133,6 +133,9 @@ public class MainApplet extends Applet implements ExtendedLength {
             case Constants.INS_ADD_POINT:
                 handleAddPoint(apdu);
                 break;
+            case Constants.INS_USE_POINT:
+                handleUsePoint(apdu);
+                break;
 
             // --- NHOM 5: MEMBERSHIP ---
             case Constants.INS_UPGRADE_SILVER:
@@ -324,6 +327,32 @@ public class MainApplet extends Applet implements ExtendedLength {
         addBigNumber(tempBufferRam, (short) 0, buffer, apdu.getOffsetCdata(), (short) 4);
 
         // 4. Ghi lai
+        repository.write(Constants.OFF_POINTS, tempBufferRam, (short) 0, Constants.LEN_POINTS, mk);
+    }
+
+    private void handleUsePoint(APDU apdu) {
+        byte[] buffer = apdu.getBuffer();
+        AESKey mk = secManager.getMasterKey();
+
+        // 1. Nhan so diem can tru (4 bytes)
+        short len = apdu.setIncomingAndReceive();
+        if (len != 4)
+            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+
+        // 2. Doc Points hien tai -> tempBufferRam
+        repository.read(Constants.OFF_POINTS, Constants.LEN_POINTS, tempBufferRam, (short) 0, mk);
+
+        // 3. Kiem tra du diem khong? (Current >= Amount?)
+        byte cmp = compareBigNumber(tempBufferRam, (short) 0, buffer, apdu.getOffsetCdata(), (short) 4);
+
+        if (cmp < 0) {
+            ISOException.throwIt(Constants.SW_VERIFICATION_FAILED); // Khong du diem
+        }
+
+        // 4. Tru diem: tempBufferRam - buffer
+        subtractBigNumber(tempBufferRam, (short) 0, buffer, apdu.getOffsetCdata(), (short) 4);
+
+        // 5. Ghi lai
         repository.write(Constants.OFF_POINTS, tempBufferRam, (short) 0, Constants.LEN_POINTS, mk);
     }
 

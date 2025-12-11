@@ -42,6 +42,7 @@ public class BookstoreClientTest {
     private static final byte INS_RETURN_BOOK = (byte) 0x57;
     private static final byte INS_GET_BORROWED_BOOKS = (byte) 0x58;
     private static final byte INS_ADD_POINT = (byte) 0x59;
+    private static final byte INS_USE_POINT = (byte) 0x5A;
 
     // --- HARDCODED TEST DATA ---
     private static final String DATA_USER_PIN = "123456";
@@ -100,6 +101,7 @@ public class BookstoreClientTest {
             System.out.println("23. Return Book");
             System.out.println("24. My Bookshelf");
             System.out.println("25. Add Points");
+            System.out.println("26. Use Points");
             System.out.println("0. Exit");
             System.out.print("Choose option: ");
 
@@ -181,6 +183,9 @@ public class BookstoreClientTest {
                         break;
                     case "25":
                         addPoints();
+                        break;
+                    case "26":
+                        usePoints();
                         break;
                     case "0":
                         System.out.println("Exiting...");
@@ -852,12 +857,11 @@ public class BookstoreClientTest {
         Arrays.fill(bookId, (byte) 0);
         System.arraycopy(inputId, 0, bookId, 0, inputId.length);
 
-        System.out.print("Enter Borrow Date (DDMMYYYY): ");
-        String date = scanner.nextLine();
-        if (date.length() != 8) {
-            System.out.println("Invalid Date Format!");
-            return;
-        }
+        // Auto-generate Today's Date
+        java.time.LocalDate now = java.time.LocalDate.now();
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy");
+        String date = now.format(formatter);
+        System.out.println("Borrow Date (Auto): " + date);
 
         System.out.print("Enter Duration (days): ");
         try {
@@ -976,6 +980,26 @@ public class BookstoreClientTest {
             getBalance();
         } else {
             System.out.println(">>> FAILED");
+        }
+    }
+
+    private static void usePoints() throws Exception {
+        checkConnection();
+        System.out.print("Enter Points to Redeem: ");
+        int points = Integer.parseInt(scanner.nextLine());
+
+        byte[] data = ByteBuffer.allocate(4).putInt(points).array();
+
+        System.out.println("Using " + points + " points...");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_USE_POINT, 0x00, 0x00, data));
+
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> REDEEM SUCCESS!");
+            getBalance();
+        } else if (r.getSW() == 0x6300) {
+            System.out.println(">>> FAILED: Not enough points!");
+        } else {
+            System.out.println(">>> FAILED. SW: " + Integer.toHexString(r.getSW()));
         }
     }
 

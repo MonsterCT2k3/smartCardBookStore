@@ -35,6 +35,7 @@ public class Constants {
     public static final byte INS_RETURN_BOOK = (byte) 0x57;
     public static final byte INS_GET_BORROWED_BOOKS = (byte) 0x58;
     public static final byte INS_ADD_POINT = (byte) 0x59;
+    public static final byte INS_USE_POINT = (byte) 0x5A;
 
     // --- ERROR CODES ---
     public static final short SW_VERIFICATION_FAILED = (short) 0x6300;
