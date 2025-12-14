@@ -43,6 +43,7 @@ public class BookstoreClientTest {
     private static final byte INS_GET_BORROWED_BOOKS = (byte) 0x58;
     private static final byte INS_ADD_POINT = (byte) 0x59;
     private static final byte INS_USE_POINT = (byte) 0x5A;
+    private static final byte INS_UPDATE_INFO = (byte) 0x40;
 
     // --- HARDCODED TEST DATA ---
     private static final String DATA_USER_PIN = "123456";
@@ -102,6 +103,7 @@ public class BookstoreClientTest {
             System.out.println("24. My Bookshelf");
             System.out.println("25. Add Points");
             System.out.println("26. Use Points");
+            System.out.println("27. Update Personal Info");
             System.out.println("0. Exit");
             System.out.print("Choose option: ");
 
@@ -186,6 +188,9 @@ public class BookstoreClientTest {
                         break;
                     case "26":
                         usePoints();
+                        break;
+                    case "27":
+                        updateUserInfo();
                         break;
                     case "0":
                         System.out.println("Exiting...");
@@ -773,10 +778,88 @@ public class BookstoreClientTest {
 
     // --- IMAGE COMPRESSION HELPER ---
     public static void compressImage(File inputFile, File outputFile, long targetSize) throws IOException {
-        // ... existing implementation ...
-        // I will just replace the end of the file to append new methods
-        // But since I cannot use "..." in search_replace, I have to be smart.
-        // I will append the new methods BEFORE the closing brace of the class.
+        BufferedImage originalImage = ImageIO.read(inputFile);
+        if (originalImage == null) {
+            throw new IOException("Cannot read image: " + inputFile.getAbsolutePath());
+        }
+
+        int width = originalImage.getWidth();
+        int height = originalImage.getHeight();
+
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
+        if (!writers.hasNext())
+            throw new IllegalStateException("No writers found for jpg");
+        ImageWriter writer = writers.next();
+
+        // 1. Try reducing Quality (Keep Dimensions)
+        float quality = 1.0f;
+        // Optimization: Create RGB image once for quality reduction phase
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+        g.drawImage(originalImage, 0, 0, Color.WHITE, null);
+        g.dispose();
+
+        while (quality >= 0.0f) {
+            if (outputFile.exists()) {
+                outputFile.delete();
+            }
+
+            try (ImageOutputStream ios = ImageIO.createImageOutputStream(outputFile)) {
+                writer.setOutput(ios);
+                ImageWriteParam param = writer.getDefaultWriteParam();
+                if (param.canWriteCompressed()) {
+                    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                    param.setCompressionQuality(quality);
+                }
+                writer.write(null, new IIOImage(image, null, null), param);
+            }
+
+            if (outputFile.length() <= targetSize) {
+                writer.dispose();
+                return;
+            }
+
+            quality -= 0.05f;
+            if (quality < 0.05f && quality > 0.0f)
+                quality = 0.0f; // Force hit 0.0f
+            else if (quality < 0.0f)
+                break;
+        }
+
+        // 2. If still too big -> Force Resize (Fallback)
+        // Only happens if lowest quality is still > 20KB
+        System.out.println(">>> Info: Lowest quality reached but still > 20KB. Starting resize loop...");
+        double scale = 0.9;
+
+        while (outputFile.length() > targetSize && scale > 0.05) {
+            if (outputFile.exists()) {
+                outputFile.delete();
+            }
+
+            int newWidth = (int) (width * scale);
+            int newHeight = (int) (height * scale);
+
+            // Safety check for tiny images
+            if (newWidth < 10 || newHeight < 10)
+                break;
+
+            BufferedImage resizedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2 = resizedImage.createGraphics();
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2.drawImage(originalImage, 0, 0, newWidth, newHeight, Color.WHITE, null);
+            g2.dispose();
+
+            try (ImageOutputStream ios = ImageIO.createImageOutputStream(outputFile)) {
+                writer.setOutput(ios);
+                ImageWriteParam param = writer.getDefaultWriteParam();
+                param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                param.setCompressionQuality(0.1f); // Low quality + Resize
+                writer.write(null, new IIOImage(resizedImage, null, null), param);
+            }
+            scale -= 0.1;
+        }
+
+        writer.dispose();
     }
 
     // --- BALANCE METHODS ---
@@ -1018,6 +1101,42 @@ public class BookstoreClientTest {
             getBalance();
         } else if (r.getSW() == 0x6300) {
             System.out.println(">>> FAILED: Insufficient Balance!");
+        } else {
+            System.out.println(">>> FAILED. SW: " + Integer.toHexString(r.getSW()));
+        }
+    }
+
+    private static void updateUserInfo() throws Exception {
+        checkConnection();
+        System.out.println("Updating Personal Info...");
+
+        System.out.print("Enter Name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter DOB (ddMMyyyy): ");
+        String dob = scanner.nextLine();
+        System.out.print("Enter Phone: ");
+        String phone = scanner.nextLine();
+        System.out.print("Enter Address: ");
+        String address = scanner.nextLine();
+
+        // Build Payload: Name(64) + DOB(16) + Phone(16) + Address(64) = 160 bytes
+        byte[] payload = new byte[160];
+        int offset = 0;
+
+        System.arraycopy(createFixedLengthData(name, 64), 0, payload, offset, 64);
+        offset += 64;
+        System.arraycopy(createFixedLengthData(dob, 16), 0, payload, offset, 16);
+        offset += 16;
+        System.arraycopy(createFixedLengthData(phone, 16), 0, payload, offset, 16);
+        offset += 16;
+        System.arraycopy(createFixedLengthData(address, 64), 0, payload, offset, 64);
+
+        System.out.println("Sending Update Request (160 bytes)...");
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, INS_UPDATE_INFO, 0x00, 0x00, payload));
+
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> UPDATE SUCCESS!");
+            getInfo(); // Hien thi lai thong tin sau khi update
         } else {
             System.out.println(">>> FAILED. SW: " + Integer.toHexString(r.getSW()));
         }

@@ -9,10 +9,6 @@
 </ExpandNodes>
 <FileNodes>
 <fnode>
-<fileName>src\crypto\Pbkdf2HmacSha256.java</fileName>
-<line>21</line>
-</fnode>
-<fnode>
 <fileName>src\common\Constants.java</fileName>
 <line>33</line>
 </fnode>
@@ -24,9 +20,13 @@
 <fileName>src\crypto\SecurityManager.java</fileName>
 <line>497</line>
 </fnode>
-<ActiveFile>
+<fnode>
 <fileName>src\applet\MainApplet.java</fileName>
 <line>12</line>
+</fnode>
+<ActiveFile>
+<fileName>src\crypto\Pbkdf2HmacSha256.java</fileName>
+<line>21</line>
 </ActiveFile>
 </FileNodes>
 </StateInfo>

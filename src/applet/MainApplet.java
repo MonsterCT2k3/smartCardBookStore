@@ -105,7 +105,7 @@ public class MainApplet extends Applet implements ExtendedLength {
                 break;
 
             case Constants.INS_UPDATE_INFO:
-                // Logic update info tuong tu
+                handleUpdateInfo(apdu);
                 break;
 
             case Constants.INS_INIT_DATA:
@@ -247,6 +247,48 @@ public class MainApplet extends Applet implements ExtendedLength {
         // De chac chan, ta fill lai 240 bytes
         Util.arrayFillNonAtomic(tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, (byte) 0);
         repository.write(Constants.OFF_BORROW_DATA, tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, mk);
+    }
+
+    private void handleUpdateInfo(APDU apdu) {
+        byte[] buffer = apdu.getBuffer();
+        AESKey mk = secManager.getMasterKey();
+
+        // Expect: Name (64) + DOB (16) + Phone (16) + Address (64) = 160 bytes
+        short len = apdu.setIncomingAndReceive();
+        
+        // Copy vao RAM truoc de xu ly
+        short offset = 0;
+        Util.arrayCopy(buffer, apdu.getOffsetCdata(), tempBufferRam, offset, len);
+        offset += len;
+
+        // Neu du lieu bi cat (chaining), doc not
+        while (len > 0 && offset < 160) {
+             len = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+             Util.arrayCopy(buffer, ISO7816.OFFSET_CDATA, tempBufferRam, offset, len);
+             offset += len;
+        }
+
+        if (offset != 160) {
+            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+        }
+
+        short readOff = 0;
+
+        // 1. Update Name
+        repository.write(Constants.OFF_FULLNAME, tempBufferRam, readOff, Constants.LEN_FULLNAME, mk);
+        readOff += Constants.LEN_FULLNAME;
+
+        // 2. Update DOB
+        repository.write(Constants.OFF_DOB, tempBufferRam, readOff, Constants.LEN_DOB, mk);
+        readOff += Constants.LEN_DOB;
+
+        // 3. Update Phone
+        repository.write(Constants.OFF_PHONE, tempBufferRam, readOff, Constants.LEN_PHONE, mk);
+        readOff += Constants.LEN_PHONE;
+
+        // 4. Update Address
+        repository.write(Constants.OFF_ADDRESS, tempBufferRam, readOff, Constants.LEN_ADDRESS, mk);
+        readOff += Constants.LEN_ADDRESS;
     }
 
     private void handleAuthGetCardId(APDU apdu) {
