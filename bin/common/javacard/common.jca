@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Thu Dec 11 21:51:12 ICT 2025
+// on Thu Dec 18 23:06:27 ICT 2025
 
 .package common {
 	.aid 0x11:0x22:0x33:0x44:0x55:0x0;
@@ -33,6 +33,8 @@
 			public static final byte INS_UPDATE_INFO = 64;		// B
 			public static final byte INS_SET_APP_KEY = 36;		// B
 			public static final byte INS_RESET_USER_PIN = 80;		// B
+			public static final byte INS_CHECK_FIRST_LOGIN = 39;		// B
+			public static final byte INS_DISABLE_FIRST_LOGIN = 40;		// B
 			public static final byte INS_GET_BALANCE = 83;		// B
 			public static final byte INS_DEPOSIT = 84;		// B
 			public static final byte INS_PAYMENT = 85;		// B

@@ -104,6 +104,8 @@ public class BookstoreClientTest {
             System.out.println("25. Add Points");
             System.out.println("26. Use Points");
             System.out.println("27. Update Personal Info");
+            System.out.println("28. Check First Login Status");
+            System.out.println("29. Disable First Login");
             System.out.println("0. Exit");
             System.out.print("Choose option: ");
 
@@ -192,6 +194,12 @@ public class BookstoreClientTest {
                     case "27":
                         updateUserInfo();
                         break;
+                    case "28":
+                        checkFirstLogin();
+                        break;
+                    case "29":
+                        disableFirstLogin();
+                        break;
                     case "0":
                         System.out.println("Exiting...");
                         return;
@@ -205,6 +213,37 @@ public class BookstoreClientTest {
     }
 
     // --- FUNCTIONAL METHODS ---
+
+    // Check First Login
+    private static void checkFirstLogin() throws Exception {
+        checkConnection();
+        System.out.println("Checking First Login Status...");
+        // INS 0x27
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, 0x27, 0x00, 0x00));
+
+        System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
+        if (r.getSW() == 0x9000) {
+            byte status = r.getData()[0];
+            System.out.println(">>> First Login: " + (status == 1 ? "YES" : "NO"));
+        } else {
+            System.out.println(">>> FAILED");
+        }
+    }
+
+    // Disable First Login
+    private static void disableFirstLogin() throws Exception {
+        checkConnection();
+        System.out.println("Disabling First Login Status...");
+        // INS 0x28
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, 0x28, 0x00, 0x00));
+
+        System.out.println("Response SW: " + Integer.toHexString(r.getSW()));
+        if (r.getSW() == 0x9000) {
+            System.out.println(">>> DISABLE SUCCESS");
+        } else {
+            System.out.println(">>> FAILED");
+        }
+    }
 
     private static void connectCard() throws Exception {
         TerminalFactory factory = TerminalFactory.getDefault();
@@ -257,7 +296,7 @@ public class BookstoreClientTest {
 
     private static void setupCard() throws Exception {
         checkConnection();
-        checkPublicKey();
+        // checkPublicKey();
 
         System.out.println("Sending Setup Data (Hardcoded)...");
 
@@ -732,6 +771,11 @@ public class BookstoreClientTest {
         if (r.getSW1() == 0x6C) {
             r = channel.transmit(new CommandAPDU(0x00, INS_GET_PUBLIC_KEY, 0x00, 0x00, r.getSW2()));
         }
+
+        if (r.getSW() == 0x6985) { // SW_CONDITIONS_NOT_SATISFIED
+            throw new RuntimeException("Card is not SETUP yet. Please run Setup Card (Option 3) first!");
+        }
+
         if (r.getSW() != 0x9000)
             throw new RuntimeException("Get PubKey failed: " + Integer.toHexString(r.getSW()));
 

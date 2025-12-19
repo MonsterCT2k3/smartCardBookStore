@@ -138,6 +138,14 @@ public class MainApplet extends Applet implements ExtendedLength {
                 break;
 
             // --- NHOM 5: MEMBERSHIP ---
+            case Constants.INS_CHECK_FIRST_LOGIN:
+                handleCheckFirstLogin(apdu);
+                break;
+
+            case Constants.INS_DISABLE_FIRST_LOGIN:
+                handleDisableFirstLogin(apdu);
+                break;
+
             case Constants.INS_UPGRADE_SILVER:
                 handleUpgradeMember(apdu, (byte) 1);
                 break;
@@ -247,6 +255,9 @@ public class MainApplet extends Applet implements ExtendedLength {
         // De chac chan, ta fill lai 240 bytes
         Util.arrayFillNonAtomic(tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, (byte) 0);
         repository.write(Constants.OFF_BORROW_DATA, tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, mk);
+
+        // --- NEW: SET FIRST LOGIN FLAG ---
+        secManager.setFirstLogin(true);
     }
 
     private void handleUpdateInfo(APDU apdu) {
@@ -255,7 +266,7 @@ public class MainApplet extends Applet implements ExtendedLength {
 
         // Expect: Name (64) + DOB (16) + Phone (16) + Address (64) = 160 bytes
         short len = apdu.setIncomingAndReceive();
-        
+
         // Copy vao RAM truoc de xu ly
         short offset = 0;
         Util.arrayCopy(buffer, apdu.getOffsetCdata(), tempBufferRam, offset, len);
@@ -263,9 +274,9 @@ public class MainApplet extends Applet implements ExtendedLength {
 
         // Neu du lieu bi cat (chaining), doc not
         while (len > 0 && offset < 160) {
-             len = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
-             Util.arrayCopy(buffer, ISO7816.OFFSET_CDATA, tempBufferRam, offset, len);
-             offset += len;
+            len = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+            Util.arrayCopy(buffer, ISO7816.OFFSET_CDATA, tempBufferRam, offset, len);
+            offset += len;
         }
 
         if (offset != 160) {
@@ -706,5 +717,17 @@ public class MainApplet extends Applet implements ExtendedLength {
                 return 1;
         }
         return 0;
+    }
+    // --- FIRST TIME LOGIN HANDLERS ---
+
+    private void handleCheckFirstLogin(APDU apdu) {
+        byte[] buffer = apdu.getBuffer();
+        buffer[0] = secManager.isFirstLogin() ? (byte) 1 : (byte) 0;
+        apdu.setOutgoingAndSend((short) 0, (short) 1);
+    }
+
+    private void handleDisableFirstLogin(APDU apdu) {
+        // Can be protected by PIN if needed, but per requirement just disable
+        secManager.setFirstLogin(false);
     }
 }

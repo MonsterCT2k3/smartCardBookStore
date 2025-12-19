@@ -20,6 +20,8 @@ public class Constants {
     public static final byte INS_UPDATE_INFO = (byte) 0x40;
     public static final byte INS_SET_APP_KEY = 0x24;
     public static final byte INS_RESET_USER_PIN = (byte) 0x50;
+    public static final byte INS_CHECK_FIRST_LOGIN = (byte) 0x27; // Check first login
+    public static final byte INS_DISABLE_FIRST_LOGIN = (byte) 0x28; // Disable first login
 
     // --- INS BALANCE ---
     public static final byte INS_GET_BALANCE = (byte) 0x53;

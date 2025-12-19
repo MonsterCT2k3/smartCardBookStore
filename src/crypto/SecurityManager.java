@@ -9,9 +9,20 @@ public class SecurityManager {
 
     // --- CAC DOI TUONG KEY ---
     private AESKey masterKey; // Khoa chu (AES-128) - Dung de encrypt du lieu User
-    private AESKey tempKey; // Khoa tam (AES-128) - Sinh ra tu PIN
+    private AESKey tempKey; // Khoa tam (AES-128) - Dung cho PBKDF2 hoac thao tac tam
 
-    private KeyPair cardRsaKeyPair; // Cap khoa RSA cua the (Private + Public)
+    // --- THAY DOI: KHONG LUU KEYPAIR VINH VIEN ---
+    // private KeyPair cardRsaKeyPair; // REMOVED
+
+    // Luu tru Private Key da ma hoa (128 bytes - chi chua Exponent)
+    private byte[] encryptedPrivateKey;
+
+    // Public Key (Luu trong EEPROM de chia se cho App)
+    private RSAPublicKey publicKey;
+
+    // Private Key Tam (Chi chua data khi can dung, xoa ngay sau do)
+    private RSAPrivateKey transientPrivateKey;
+
     private RSAPublicKey appPublicKey; // Khoa Public cua App (Desktop) gui xuong
 
     // --- LUU TRU TRONG EEPROM ---
@@ -34,23 +45,33 @@ public class SecurityManager {
     private RandomData random; // Sinh so ngau nhien
 
     // --- BO NHO DEM (RAM) ---
-    private byte[] scratch;
+    private byte[] scratch; // Buffer da dung (phai du lon ~256 bytes cho RSA Key components)
     private byte[] zeroIV; // IV toan 0 de reset trang thai Cipher
 
     // --- TRANG THAI ---
     private boolean isUnlocked;
     private byte pinTries;
+    private boolean isSetup; // Check if setupCard has been called
 
     public SecurityManager() {
         // 1. Khoi tao cac Key rong
         masterKey = (AESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_AES, KeyBuilder.LENGTH_AES_128, false);
         tempKey = (AESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_AES, KeyBuilder.LENGTH_AES_128, false);
 
-        // 2. Init RSA (Tao cap khoa ngau nhien cho the ngay luc cai dat)
-        cardRsaKeyPair = new KeyPair(KeyPair.ALG_RSA, KeyBuilder.LENGTH_RSA_1024);
-        cardRsaKeyPair.genKeyPair();
+        // 2. Init Storage cho Keys
+        // Public Key (Persistent)
+        publicKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, KeyBuilder.LENGTH_RSA_1024, false);
 
-        // Tao object chua Key cua App (cho App gui xuong moi co du lieu)
+        // Private Key (Transient Container - Persistent Object but treated as
+        // transient)
+        // Note: Creating a persistent key object but we will manage its content
+        transientPrivateKey = (RSAPrivateKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PRIVATE,
+                KeyBuilder.LENGTH_RSA_1024, false);
+
+        // Encrypted Private Key Blob (128 bytes Exponent)
+        encryptedPrivateKey = new byte[128]; // RSA 1024 bit exponent length
+
+        // Tao object chua Key cua App
         appPublicKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, KeyBuilder.LENGTH_RSA_1024,
                 false);
 
@@ -73,21 +94,82 @@ public class SecurityManager {
         random = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
 
         // Buffer tam trong RAM (Transient)
-        scratch = JCSystem.makeTransientByteArray((short) 128, JCSystem.CLEAR_ON_RESET);
+        // Tang size len 256 de chua Modulus/Exponent khi thao tac
+        scratch = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
         // IV toan 0 (Transient)
         zeroIV = JCSystem.makeTransientByteArray((short) 16, JCSystem.CLEAR_ON_RESET);
 
         isUnlocked = false;
         pinTries = 0;
+        isSetup = false;
     }
 
     // =========================================================================
-    // PHAN 1: QUAN LY SETUP & PIN (DATA AT REST)
+    // HELPER: ENCRYPT / RESTORE PRIVATE KEY
     // =========================================================================
 
-    // HAM HELPER: Check Admin PIN (Tra ve true neu dung)
-    // Luu y: Ham nay se luu Admin Key Plain vao scratch[80..95] de cac ham sau su
-    // dung
+    // Encrypt Private Key (Exponent) using MasterKey (Plain) and store to EEPROM
+    // MasterKey must be present in masterKeyBuffer (scratch)
+    private void encryptAndStorePrivateKey(RSAPrivateKey privKey, byte[] masterKeyBuffer, short masterKeyOff) {
+        // 1. Extract Private Exponent -> scratch[160] (Tranh vung MasterKey o
+        // scratch[0..31])
+        // Exponent RSA 1024 = 128 bytes. Use buffer at 128.
+        short expLen = privKey.getExponent(scratch, (short) 128);
+
+        // Fix: Ensure exactly 128 bytes for AES CBC NOPAD
+        // If expLen < 128, pad with leading zeros (Right Align)
+        if (expLen < 128) {
+            short diff = (short) (128 - expLen);
+            // Move data to end
+            Util.arrayCopyNonAtomic(scratch, (short) 128, scratch, (short) (128 + diff), expLen);
+            // Fill leading with 0
+            Util.arrayFillNonAtomic(scratch, (short) 128, diff, (byte) 0);
+        }
+
+        // 2. Encrypt Exponent using Master Key
+        // Load Master Key to tempKey for encryption
+        tempKey.setKey(masterKeyBuffer, masterKeyOff);
+
+        aesCipher.init(tempKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
+
+        // Always encrypt 128 bytes
+        aesCipher.doFinal(scratch, (short) 128, (short) 128, encryptedPrivateKey, (short) 0);
+
+        // Clean scratch
+        Util.arrayFillNonAtomic(scratch, (short) 128, (short) 128, (byte) 0);
+    }
+
+    // Restore Private Key from EEPROM -> transientPrivateKey
+    // Require: isUnlocked = true (MasterKey loaded)
+    private void restorePrivateKey() {
+        if (!isUnlocked) {
+            ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
+        }
+
+        // 1. Decrypt EncryptedPrivateKey -> scratch
+        aesCipher.init(masterKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
+        aesCipher.doFinal(encryptedPrivateKey, (short) 0, (short) 128, scratch, (short) 0);
+
+        // 2. Set Exponent to transientPrivateKey
+        transientPrivateKey.setExponent(scratch, (short) 0, (short) 128);
+
+        // 3. Set Modulus to transientPrivateKey (Lay tu PublicKey)
+        // Can Modulus de RSA hoat dong
+        short modLen = publicKey.getModulus(scratch, (short) 0);
+        transientPrivateKey.setModulus(scratch, (short) 0, modLen);
+
+        // Clean scratch (Sensitive Exponent)
+        Util.arrayFillNonAtomic(scratch, (short) 0, (short) 128, (byte) 0);
+    }
+
+    private void clearTransientPrivateKey() {
+        transientPrivateKey.clearKey();
+    }
+
+    // =========================================================================
+    // PHAN 1: QUAN LY SETUP & PIN
+    // =========================================================================
+
     private boolean checkAdminPin(byte[] pinBuffer, short pinOffset) {
         // Derive AdminPIN -> Key thu (scratch[64])
         pbkdf2.derive(pinBuffer, pinOffset, (short) 6, adminSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS,
@@ -95,7 +177,6 @@ public class SecurityManager {
         tempKey.setKey(scratch, (short) 64);
 
         // Giai ma encryptedAdminKey -> scratch[80]
-        // *** FIX IV: Luon dung IV 0 de dong bo ***
         aesCipher.init(tempKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
         aesCipher.doFinal(encryptedAdminKey, (short) 0, (short) 16, scratch, (short) 80);
 
@@ -103,68 +184,51 @@ public class SecurityManager {
         sha256.reset();
         sha256.doFinal(scratch, (short) 80, (short) 16, scratch, (short) 96);
 
-        // Compare Hash
         return Util.arrayCompare(scratch, (short) 96, adminKeyHash, (short) 0, (short) 32) == 0;
     }
 
     public void processUnblockCard(byte[] buffer, short offset, short len) {
-        // --- REMOVED DECRYPT ---
-        // Nhan Plaintext Admin PIN (6 bytes)
-
-        // Admin PIN = 6 bytes
         if (len < 6)
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
-        // 2. Verify Admin PIN
         if (checkAdminPin(buffer, offset)) {
-            // Dung Admin PIN -> Reset counter
             pinTries = 0;
         } else {
             ISOException.throwIt(Constants.SW_VERIFICATION_FAILED);
         }
-
-        // Xoa buffer (khong can thiet neu chi doc, nhung cu lam cho an toan)
-        // Util.arrayFillNonAtomic(buffer, offset, len, (byte) 0);
     }
 
-    // Ham giai ma Hybrid goi tin nhan vao (Dung cho Setup, Verify, Reset)
-    // Input: [RSA_Encrypted_SessionKey (128 bytes)] + [AES_Encrypted_Data (16
-    // bytes)]
-    // Output: Ghi du lieu ro vao buffer
-    // Tra ve: Do dai du lieu ro
     public short decryptIncomingData(byte[] buffer, short offset, short len) {
-        // 1. Tach RSA block (Session Key)
-        // Session Key encrypted nam o dau buffer
-        rsaCipher.init(cardRsaKeyPair.getPrivate(), Cipher.MODE_DECRYPT);
+        // --- MODIFIED: DECRYPT ON DEMAND ---
+        restorePrivateKey();
 
-        // Giai ma Session Key -> Luu tam vao scratch[0..15]
-        // Do dai RSA 1024 bit = 128 bytes
-        rsaCipher.doFinal(buffer, offset, (short) 128, scratch, (short) 0);
+        try {
+            // 1. Init RSA with Decrypt Mode
+            rsaCipher.init(transientPrivateKey, Cipher.MODE_DECRYPT);
 
-        // 2. Load Session Key vao TempKey
-        tempKey.setKey(scratch, (short) 0);
+            // Giai ma Session Key -> scratch[0..15]
+            rsaCipher.doFinal(buffer, offset, (short) 128, scratch, (short) 0);
 
-        // 3. Giai ma Data AES
-        // Data encrypted nam ngay sau RSA block
-        short dataOff = (short) (offset + 128);
-        short dataLen = (short) (len - 128);
+            // 2. Load Session Key vao TempKey
+            tempKey.setKey(scratch, (short) 0);
 
-        // *** FIX IV: Luon dung IV 0 de dong bo ***
-        aesCipher.init(tempKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
-        short plainLen = aesCipher.doFinal(buffer, dataOff, dataLen, buffer, offset);
+            // 3. Giai ma Data AES
+            short dataOff = (short) (offset + 128);
+            short dataLen = (short) (len - 128);
 
-        // Xoa session key
-        Util.arrayFillNonAtomic(scratch, (short) 0, (short) 16, (byte) 0);
+            aesCipher.init(tempKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
+            short plainLen = aesCipher.doFinal(buffer, dataOff, dataLen, buffer, offset);
 
-        return plainLen;
+            // Cleanup
+            Util.arrayFillNonAtomic(scratch, (short) 0, (short) 16, (byte) 0);
+
+            return plainLen;
+        } finally {
+            clearTransientPrivateKey();
+        }
     }
 
-    // Setup the lan dau (Secure Setup): Nhan PLAINTEXT
-    // Input: [UserPIN (6)] + [AdminPIN (6)] = 12 bytes
-    // Tu sinh UserKey va AdminKey ngau nhien
     public void setupCard(byte[] buffer, short offset, short len) {
-        // --- REMOVED DECRYPT INCOMING DATA ---
-        // Du lieu da la Plaintext, do dai phai dung 12 bytes
         if (len != 12)
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
@@ -174,226 +238,187 @@ public class SecurityManager {
         JCSystem.beginTransaction();
         try {
             // --- XU LY USER KEY ---
-            // 1. Sinh User MasterKey ngau nhien
-            // Luu tam vao scratch[16..31]
+            // 1. Sinh User MasterKey ngau nhien -> scratch[16..31]
             random.generateData(scratch, (short) 16, (short) 16);
+
+            // --- NEW: GEN RSA KEYPAIR & ENCRYPT WITH MASTER KEY ---
+            // Tao KeyPair tam
+            KeyPair tempPair = new KeyPair(KeyPair.ALG_RSA, KeyBuilder.LENGTH_RSA_1024);
+            tempPair.genKeyPair();
+
+            // Encrypt & Store Private Key (Dung MasterKey o scratch[16])
+            encryptAndStorePrivateKey((RSAPrivateKey) tempPair.getPrivate(), scratch, (short) 16);
+
+            // Store Public Key
+            RSAPublicKey tempPub = (RSAPublicKey) tempPair.getPublic();
+            short rsaLen = tempPub.getModulus(scratch, (short) 128); // Muon tmp buffer
+            publicKey.setModulus(scratch, (short) 128, rsaLen);
+            rsaLen = tempPub.getExponent(scratch, (short) 128);
+            publicKey.setExponent(scratch, (short) 128, rsaLen);
+            // ----------------------------------------------------
 
             // 2. Tao Salt ngau nhien cho User
             random.generateData(cardSalt, (short) 0, (short) 16);
 
-            // 3. Dan xuat UserPIN + Salt -> TempKey
+            // 3. Dan xuat UserPIN -> TempKey (scratch[0..15])
             pbkdf2.derive(buffer, userPinOff, (short) 6, cardSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS,
                     scratch, (short) 0);
             tempKey.setKey(scratch, (short) 0);
 
-            // 4. Ma hoa User MasterKey bang TempKey -> encryptedMasterKey
-            // *** FIX IV: Luon dung IV 0 de dong bo ***
-            aesCipher.init(tempKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
-            aesCipher.doFinal(scratch, (short) 16, (short) 16, encryptedMasterKey, (short) 0);
-
-            // 5. Hash User MasterKey de danh doi chieu sau nay
-            sha256.reset();
-            sha256.doFinal(scratch, (short) 16, (short) 16, masterKeyHash, (short) 0);
-
-            // --- XU LY ADMIN KEY ---
-            // 6. Sinh Admin Key ngau nhien
-            // Luu tam vao scratch[32..47] (Doi offset de khong ghi de MasterKey o
-            // scratch[16])
-            random.generateData(scratch, (short) 32, (short) 16);
-
-            // 7. Tao Salt ngau nhien cho Admin
-            random.generateData(adminSalt, (short) 0, (short) 16);
-
-            // 8. Dan xuat AdminPIN + AdminSalt -> TempKey (Tai su dung tempKey)
-            // Luu key derived vao scratch[64..79]
-            pbkdf2.derive(buffer, adminPinOff, (short) 6, adminSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS,
-                    scratch, (short) 64);
-            tempKey.setKey(scratch, (short) 64);
-
-            // 9. Ma hoa AdminKey (dang o scratch[32]) bang TempKey -> encryptedAdminKey
-            aesCipher.init(tempKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
-            aesCipher.doFinal(scratch, (short) 32, (short) 16, encryptedAdminKey, (short) 0);
-
-            // 10. Hash AdminKey de danh doi chieu sau nay
-            sha256.reset();
-            sha256.doFinal(scratch, (short) 32, (short) 16, adminKeyHash, (short) 0);
-
-            // --- BACKUP MASTER KEY (NEW) ---
-            // 11. Ma hoa MasterKey (scratch[16]) bang AdminKey (scratch[32]) ->
-            // encryptedMasterKeyByAdmin
-            tempKey.setKey(scratch, (short) 32); // Load AdminKey
-            aesCipher.init(tempKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
-            aesCipher.doFinal(scratch, (short) 16, (short) 16, encryptedMasterKeyByAdmin, (short) 0);
-
-            JCSystem.commitTransaction();
-        } catch (Exception e) {
-            JCSystem.abortTransaction();
-            ISOException.throwIt(ISO7816.SW_UNKNOWN);
-        }
-
-        Util.arrayFillNonAtomic(scratch, (short) 0, (short) 128, (byte) 0);
-    }
-
-    // Ham reset User Key bang Admin Key (Khi quen User PIN)
-    // Input: [AdminPIN 6] + [NewUserPIN 6] (MasterKey tu sinh)
-    // Giai ma: AdminPIN + NewUserPIN = 12 bytes
-    public void resetUserKey(byte[] buffer, short offset) {
-        // buffer[offset] la AdminPIN
-        // buffer[offset+6] la NewUserPIN
-
-        short adminPinOff = offset;
-        short newUserPinOff = (short) (offset + 6);
-
-        // 1. Xac thuc Admin PIN truoc (Dung Helper moi)
-        if (!checkAdminPin(buffer, adminPinOff)) {
-            // DEBUG: Bao loi Hash Admin khong khop
-            short debugHash = (short) (0x6600 | (scratch[96] & 0xFF));
-            ISOException.throwIt(debugHash);
-        }
-
-        // --- ADMIN DUNG -> TIEN HANH RESET USER KEY ---
-        // AdminKey Plain dang o scratch[80..95] (do checkAdminPin da giai ma va de do)
-
-        JCSystem.beginTransaction();
-        try {
-            // 1. Khoi phuc MasterKey cu tu Ban Backup (encryptedMasterKeyByAdmin)
-            // Dung AdminKey (scratch[80]) de giai ma
-            tempKey.setKey(scratch, (short) 80);
-            aesCipher.init(tempKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
-            // Giai ma -> MasterKey Plain -> scratch[16..31]
-            aesCipher.doFinal(encryptedMasterKeyByAdmin, (short) 0, (short) 16, scratch, (short) 16);
-
-            // --- ADDED: Generate New RSA KeyPair (Key Rotation) ---
-            cardRsaKeyPair.genKeyPair();
-
-            // 2. Dan xuat NewUserPIN + OldSalt -> TempKey (Dung de ma hoa lai MasterKey)
-            // scratch[64..79]
-            pbkdf2.derive(buffer, newUserPinOff, (short) 6, cardSalt, (short) 0, (short) 16,
-                    Constants.PBKDF2_ITERATIONS, scratch, (short) 64);
-            tempKey.setKey(scratch, (short) 64);
-
-            // 3. Ma hoa MasterKey Cu (scratch[16]) bang NewUserPIN -> Luu vao
+            // 4. Ma hoa User MasterKey (dang o scratch[16]) bang TempKey ->
             // encryptedMasterKey
             aesCipher.init(tempKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
             aesCipher.doFinal(scratch, (short) 16, (short) 16, encryptedMasterKey, (short) 0);
 
-            // 4. Hash MasterKey (de dam bao tinh toan ven, du la key cu thi hash van phai
-            // giong cu)
-            // (Thuc ra buoc nay hoi thua vi MasterKey khong doi, nhung cu lam cho chac)
+            // 5. Hash User MasterKey
             sha256.reset();
             sha256.doFinal(scratch, (short) 16, (short) 16, masterKeyHash, (short) 0);
 
-            // Reset so lan thu PIN
-            pinTries = 0;
+            // --- XU LY ADMIN KEY ---
+            // 6. Sinh Admin Key ngau nhien -> scratch[32..47]
+            random.generateData(scratch, (short) 32, (short) 16);
 
+            // 7. Tao Salt Admin
+            random.generateData(adminSalt, (short) 0, (short) 16);
+
+            // 8. Dan xuat AdminPIN -> TempKey (reuse) -> scratch[64..79]
+            pbkdf2.derive(buffer, adminPinOff, (short) 6, adminSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS,
+                    scratch, (short) 64);
+            tempKey.setKey(scratch, (short) 64);
+
+            // 9. Ma hoa AdminKey (scratch[32]) -> encryptedAdminKey
+            aesCipher.init(tempKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
+            aesCipher.doFinal(scratch, (short) 32, (short) 16, encryptedAdminKey, (short) 0);
+
+            // 10. Hash AdminKey
+            sha256.reset();
+            sha256.doFinal(scratch, (short) 32, (short) 16, adminKeyHash, (short) 0);
+
+            // 11. Backup MasterKey (scratch[16]) bang AdminKey (scratch[32])
+            tempKey.setKey(scratch, (short) 32);
+            aesCipher.init(tempKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
+            aesCipher.doFinal(scratch, (short) 16, (short) 16, encryptedMasterKeyByAdmin, (short) 0);
+
+            isSetup = true;
             JCSystem.commitTransaction();
         } catch (Exception e) {
             JCSystem.abortTransaction();
             ISOException.throwIt(ISO7816.SW_UNKNOWN);
         }
 
-        Util.arrayFillNonAtomic(scratch, (short) 0, (short) 128, (byte) 0);
+        Util.arrayFillNonAtomic(scratch, (short) 0, (short) 256, (byte) 0);
     }
 
-    // Ham xac thuc PIN (Dau vao la PLAINTEXT)
-    // Input: [PIN 6 bytes] (hoac duoc pad thanh 16)
+    public void processResetUserKey(byte[] buffer, short offset, short len) {
+        if (len < 12)
+            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+        resetUserKey(buffer, offset);
+    }
+
+    public void resetUserKey(byte[] buffer, short offset) {
+        short adminPinOff = offset;
+        short newUserPinOff = (short) (offset + 6);
+
+        if (!checkAdminPin(buffer, adminPinOff)) {
+            ISOException.throwIt(Constants.SW_VERIFICATION_FAILED);
+        }
+
+        // AdminKey Plain dang o scratch[80..95]
+        JCSystem.beginTransaction();
+        try {
+            // 1. Khoi phuc MasterKey cu -> scratch[16..31]
+            tempKey.setKey(scratch, (short) 80);
+            aesCipher.init(tempKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
+            aesCipher.doFinal(encryptedMasterKeyByAdmin, (short) 0, (short) 16, scratch, (short) 16);
+
+            // --- Key Rotation ---
+            KeyPair tempPair = new KeyPair(KeyPair.ALG_RSA, KeyBuilder.LENGTH_RSA_1024);
+            tempPair.genKeyPair();
+
+            // Encrypt Private Key with Recovered MasterKey (scratch[16])
+            encryptAndStorePrivateKey((RSAPrivateKey) tempPair.getPrivate(), scratch, (short) 16);
+
+            // Store Public Key
+            RSAPublicKey tempPub = (RSAPublicKey) tempPair.getPublic();
+            short rsaLen = tempPub.getModulus(scratch, (short) 128);
+            publicKey.setModulus(scratch, (short) 128, rsaLen);
+            rsaLen = tempPub.getExponent(scratch, (short) 128);
+            publicKey.setExponent(scratch, (short) 128, rsaLen);
+            // ---------------------
+
+            // 2. Dan xuat NewUserPIN -> TempKey
+            pbkdf2.derive(buffer, newUserPinOff, (short) 6, cardSalt, (short) 0, (short) 16,
+                    Constants.PBKDF2_ITERATIONS, scratch, (short) 64);
+            tempKey.setKey(scratch, (short) 64);
+
+            // 3. Ma hoa lai MasterKey
+            aesCipher.init(tempKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
+            aesCipher.doFinal(scratch, (short) 16, (short) 16, encryptedMasterKey, (short) 0);
+
+            // 4. Hash (Optional)
+            sha256.reset();
+            sha256.doFinal(scratch, (short) 16, (short) 16, masterKeyHash, (short) 0);
+
+            pinTries = 0;
+            JCSystem.commitTransaction();
+        } catch (Exception e) {
+            JCSystem.abortTransaction();
+            ISOException.throwIt(ISO7816.SW_UNKNOWN);
+        }
+        Util.arrayFillNonAtomic(scratch, (short) 0, (short) 256, (byte) 0);
+    }
+
     public void verifyPin(byte[] buffer, short offset, short len) {
         if (pinTries >= Constants.PIN_MAX_TRIES)
             ISOException.throwIt(Constants.SW_CARD_LOCKED);
-
-        // --- REMOVED DECRYPT ---
-
-        // Client gui: 6 bytes PIN. Len co the lon hon neu padding
         if (len < 6)
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-
-        // 2. Goi ham verify noi bo voi PIN tran (lay 6 bytes thuc)
         verifyPinInternal(buffer, offset, (short) 6);
-
-        // 3. Xoa ngay buffer chua PIN tran (Optional neu can secure memory, nhung day
-        // la RAM buffer cua APDU)
     }
 
-    // Ham noi bo: Logic PBKDF2 de mo khoa MasterKey
     private void verifyPinInternal(byte[] pin, short pinOff, short pinLen) {
-        // 1. PIN + SaltStored -> TempKey
-        // Ket qua Key nam o scratch[64..79] (de tranh ghi de len PIN o doan dau)
+        // 1. PIN -> TempKey (scratch[64])
         pbkdf2.derive(pin, pinOff, pinLen, cardSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS, scratch,
                 (short) 64);
         tempKey.setKey(scratch, (short) 64);
 
-        // 2. Dung TempKey giai ma EncryptedMasterKey -> Luu vao scratch[80..95]
-        // *** FIX IV: Luon dung IV 0 de dong bo ***
+        // 2. Decrypt MasterKey -> scratch[80]
         aesCipher.init(tempKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
         aesCipher.doFinal(encryptedMasterKey, (short) 0, (short) 16, scratch, (short) 80);
 
-        // 3. Hash ket qua vua giai ma -> Luu vao scratch[96..127]
+        // 3. Validate Hash
         sha256.reset();
         sha256.doFinal(scratch, (short) 80, (short) 16, scratch, (short) 96);
 
-        // 4. So sanh voi Hash goc
         if (Util.arrayCompare(scratch, (short) 96, masterKeyHash, (short) 0, (short) 32) == 0) {
-            // DUNG PIN!
             pinTries = 0;
             isUnlocked = true;
-            // Load MasterKey that vao object de dung cho session nay
             masterKey.setKey(scratch, (short) 80);
         } else {
-            // SAI PIN
             pinTries++;
             isUnlocked = false;
-            // DEBUG: Nem ma loi 66XX de biet Hash sai
-            short debugHash = (short) (0x6600 | (scratch[96] & 0xFF));
-            ISOException.throwIt(debugHash);
-            // ISOException.throwIt(Constants.SW_VERIFICATION_FAILED);
+            ISOException.throwIt(Constants.SW_VERIFICATION_FAILED);
         }
+        Util.arrayFillNonAtomic(scratch, (short) 64, (short) 64, (byte) 0);
     }
 
-    // Xu ly goi tin Reset User Key (Ma hoa Hybrid)
-    // Packet: [RSA 128 bytes] + [AES Encrypted (AdminPIN 6 + NewUserPIN 6 + Pad 4)
-    // 16 bytes]
-    public void processResetUserKey(byte[] buffer, short offset, short len) {
-        // --- REMOVED DECRYPT ---
-
-        // Tong data phai la 12 bytes (6 Admin + 6 User)
-        if (len < 12)
-            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-
-        // 2. Goi ham resetUserKey voi du lieu da giai ma
-        resetUserKey(buffer, offset);
-
-        // 3. Xoa buffer nhay cam
-        // Util.arrayFillNonAtomic(buffer, offset, plainLen, (byte) 0);
-    }
-
-    // Change PIN (Plaintext)
-    // Packet: [OldPIN 6] + [NewPIN 6]
     public void changePin(byte[] buffer, short offset, short len) {
-        // --- REMOVED DECRYPT ---
         if (len < 12)
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-
         changePinInternal(buffer, offset);
-
-        // Xoa buffer (Optional)
     }
 
-    // Helper: Logic Change PIN (Input la Plaintext)
     private void changePinInternal(byte[] buffer, short offset) {
         short oldPinOff = offset;
         short newPinOff = (short) (offset + 6);
 
-        // 1. Verify Old PIN
-        // Derive OldPIN -> scratch[64]
+        // Verify Old PIN & Get MasterKey (scratch[16])
         pbkdf2.derive(buffer, oldPinOff, (short) 6, cardSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS,
                 scratch, (short) 64);
         tempKey.setKey(scratch, (short) 64);
-
-        // Decrypt EncryptedMasterKey -> scratch[16] (MasterKey Plain)
         aesCipher.init(tempKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
         aesCipher.doFinal(encryptedMasterKey, (short) 0, (short) 16, scratch, (short) 16);
 
-        // Validate Hash
         sha256.reset();
         sha256.doFinal(scratch, (short) 16, (short) 16, scratch, (short) 96);
 
@@ -402,19 +427,28 @@ public class SecurityManager {
             ISOException.throwIt(Constants.SW_VERIFICATION_FAILED);
         }
 
-        // --- OLD PIN CORRECT ---
-
         JCSystem.beginTransaction();
         try {
-            // --- ADDED: Generate New RSA KeyPair (Key Rotation) ---
-            cardRsaKeyPair.genKeyPair();
+            // --- Key Rotation ---
+            KeyPair tempPair = new KeyPair(KeyPair.ALG_RSA, KeyBuilder.LENGTH_RSA_1024);
+            tempPair.genKeyPair();
 
-            // 2. Derive NewPIN -> NewKey (scratch[64])
+            // Encrypt Private Key with MasterKey (scratch[16])
+            encryptAndStorePrivateKey((RSAPrivateKey) tempPair.getPrivate(), scratch, (short) 16);
+
+            // Store Public Key
+            RSAPublicKey tempPub = (RSAPublicKey) tempPair.getPublic();
+            short rsaLen = tempPub.getModulus(scratch, (short) 128);
+            publicKey.setModulus(scratch, (short) 128, rsaLen);
+            rsaLen = tempPub.getExponent(scratch, (short) 128);
+            publicKey.setExponent(scratch, (short) 128, rsaLen);
+            // ---------------------
+
+            // Encrypt MasterKey with New PIN
             pbkdf2.derive(buffer, newPinOff, (short) 6, cardSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS,
                     scratch, (short) 64);
             tempKey.setKey(scratch, (short) 64);
 
-            // 3. Encrypt MasterKey (scratch[16]) bang NewKey -> encryptedMasterKey
             aesCipher.init(tempKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
             aesCipher.doFinal(scratch, (short) 16, (short) 16, encryptedMasterKey, (short) 0);
 
@@ -424,30 +458,36 @@ public class SecurityManager {
             JCSystem.abortTransaction();
             ISOException.throwIt(ISO7816.SW_UNKNOWN);
         }
-
-        Util.arrayFillNonAtomic(scratch, (short) 0, (short) 128, (byte) 0);
+        Util.arrayFillNonAtomic(scratch, (short) 0, (short) 256, (byte) 0);
     }
 
     // =========================================================================
-    // PHAN 2: TRAO DOI KHOA & DUONG TRUYEN (DATA IN TRANSIT)
+    // PHAN 2: TRAO DOI KHOA & DUONG TRUYEN
     // =========================================================================
 
     public short signData(byte[] input, short inOff, short inLen, byte[] sigBuff, short sigOff) {
-        // 1. Init Signature voi Private Key
-        rsaSignature.init(cardRsaKeyPair.getPrivate(), Signature.MODE_SIGN);
+        // --- MODIFIED: DECRYPT ON DEMAND ---
+        restorePrivateKey();
 
-        // 2. Ky du lieu
-        return rsaSignature.sign(input, inOff, inLen, sigBuff, sigOff);
+        try {
+            rsaSignature.init(transientPrivateKey, Signature.MODE_SIGN);
+            return rsaSignature.sign(input, inOff, inLen, sigBuff, sigOff);
+        } finally {
+            clearTransientPrivateKey();
+        }
     }
 
     public RSAPublicKey getCardPublicKey() {
-        return (RSAPublicKey) cardRsaKeyPair.getPublic();
+        if (!isSetup) {
+            // Option: Throw error or return empty key
+            ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+        }
+        return publicKey;
     }
 
     public void setAppPublicKey(byte[] buffer, short offset, short len) {
-        // Gia su App gui Modulus (RSA Key Components)
         appPublicKey.setModulus(buffer, offset, len);
-        byte[] exp = { 0x01, 0x00, 0x01 }; // Exponent mac dinh 65537
+        byte[] exp = { 0x01, 0x00, 0x01 };
         appPublicKey.setExponent(exp, (short) 0, (short) 3);
     }
 
@@ -504,5 +544,16 @@ public class SecurityManager {
 
     public byte getPinTries() {
         return pinTries;
+    }
+
+    // --- FIRST TIME LOGIN STATE ---
+    private boolean isFirstLogin;
+
+    public void setFirstLogin(boolean status) {
+        this.isFirstLogin = status;
+    }
+
+    public boolean isFirstLogin() {
+        return this.isFirstLogin;
     }
 }
