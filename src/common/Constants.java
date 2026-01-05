@@ -49,11 +49,9 @@ public class Constants {
     public static final short DATA_SIZE = (short) 24576;
 
     // 1. Card ID (16 bytes)
-    public static final short OFF_CARD_ID = (short) 0;
     public static final short LEN_CARD_ID = (short) 16;
 
     // 2. Ho ten (64 bytes)
-    public static final short OFF_FULLNAME = (short) 16;
     public static final short LEN_FULLNAME = (short) 64;
 
     // 3. Ngay sinh (16 bytes)
@@ -61,47 +59,38 @@ public class Constants {
     public static final short LEN_DOB = (short) 16;
 
     // 4. So dien thoai (16 bytes)
-    public static final short OFF_PHONE = (short) 96;
     public static final short LEN_PHONE = (short) 16;
 
     // 5. Dia chi (64 bytes)
-    public static final short OFF_ADDRESS = (short) 112;
     public static final short LEN_ADDRESS = (short) 64;
 
     // 6. Ngay dang ky (16 bytes)
-    public static final short OFF_REG_DATE = (short) 176;
     public static final short LEN_REG_DATE = (short) 16;
 
     // 7. App Public Key (128 bytes)
-    public static final short OFF_APP_PUBLIC_KEY = (short) 192;
     public static final short LEN_APP_PUBLIC_KEY = (short) 128;
 
     // 8. Balance (So du tai khoan) - Luu 16 bytes (4 bytes so + 12 bytes padding)
     // de tron Block AES
-    public static final short OFF_BALANCE = (short) 320;
     public static final short LEN_BALANCE = (short) 16;
 
     // 9. Points (Diem tich luy) - Luu 16 bytes (4 bytes so + 12 bytes padding)
-    public static final short OFF_POINTS = (short) 336;
     public static final short LEN_POINTS = (short) 16;
 
     // 10. Member Type (16 bytes)
     // Offset = 336 + 16 = 352
-    public static final short OFF_MEMBER_TYPE = (short) 352;
     public static final short LEN_MEMBER_TYPE = (short) 16;
 
     // 11. Borrowed Books Data (Max 15 books)
     // Moi slot 16 bytes: 7 (ID) + 8 (Date) + 1 (Duration)
     // Total len = 15 * 16 = 240 bytes
     // Offset = 352 + 16 = 368
-    public static final short OFF_BORROW_DATA = (short) 368;
     public static final short LEN_BORROW_DATA = (short) 240;
     public static final byte MAX_BORROWED_BOOKS = (byte) 15;
     public static final byte LEN_BOOK_SLOT = (byte) 16;
 
     // 12. Image (20480 bytes = 20KB)
     // Offset = 368 + 240 = 608
-    public static final short OFF_IMAGE = (short) 608;
     public static final short LEN_IMAGE = (short) 20480;
 
     // --- SECURITY ---

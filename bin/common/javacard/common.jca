@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Thu Dec 18 23:06:27 ICT 2025
+// on Mon Jan 05 22:02:37 ICT 2026
 
 .package common {
 	.aid 0x11:0x22:0x33:0x44:0x55:0x0;
@@ -49,31 +49,20 @@
 			public static final short SW_VERIFICATION_FAILED = 25344;		// S
 			public static final short SW_CARD_LOCKED = 27011;		// S
 			public static final short DATA_SIZE = 24576;		// S
-			public static final short OFF_CARD_ID = 0;		// S
 			public static final short LEN_CARD_ID = 16;		// S
-			public static final short OFF_FULLNAME = 16;		// S
 			public static final short LEN_FULLNAME = 64;		// S
 			public static final short OFF_DOB = 80;		// S
 			public static final short LEN_DOB = 16;		// S
-			public static final short OFF_PHONE = 96;		// S
 			public static final short LEN_PHONE = 16;		// S
-			public static final short OFF_ADDRESS = 112;		// S
 			public static final short LEN_ADDRESS = 64;		// S
-			public static final short OFF_REG_DATE = 176;		// S
 			public static final short LEN_REG_DATE = 16;		// S
-			public static final short OFF_APP_PUBLIC_KEY = 192;		// S
 			public static final short LEN_APP_PUBLIC_KEY = 128;		// S
-			public static final short OFF_BALANCE = 320;		// S
 			public static final short LEN_BALANCE = 16;		// S
-			public static final short OFF_POINTS = 336;		// S
 			public static final short LEN_POINTS = 16;		// S
-			public static final short OFF_MEMBER_TYPE = 352;		// S
 			public static final short LEN_MEMBER_TYPE = 16;		// S
-			public static final short OFF_BORROW_DATA = 368;		// S
 			public static final short LEN_BORROW_DATA = 240;		// S
 			public static final byte MAX_BORROWED_BOOKS = 15;		// B
 			public static final byte LEN_BOOK_SLOT = 16;		// B
-			public static final short OFF_IMAGE = 608;		// S
 			public static final short LEN_IMAGE = 20480;		// S
 			public static final short PBKDF2_ITERATIONS = 500;		// S
 			public static final byte PIN_MAX_TRIES = 3;		// B

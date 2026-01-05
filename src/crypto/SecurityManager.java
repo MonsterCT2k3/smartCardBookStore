@@ -9,6 +9,7 @@ public class SecurityManager {
 
     // --- CAC DOI TUONG KEY ---
     private AESKey masterKey; // Khoa chu (AES-128) - Dung de encrypt du lieu User
+    private AESKey adminKey; // Khoa Admin (AES-128) - Dung de encrypt MasterKey (Backup)
     private AESKey tempKey; // Khoa tam (AES-128) - Dung cho PBKDF2 hoac thao tac tam
 
     // --- THAY DOI: KHONG LUU KEYPAIR VINH VIEN ---
@@ -32,7 +33,8 @@ public class SecurityManager {
 
     // Admin (de reset User Key khi quen PIN)
     private byte[] adminPinHash; // Hash cua Admin PIN (de xac thuc nhanh)
-    private byte[] encryptedMasterKeyByAdmin; // MasterKey bi ma hoa boi PIN Admin (Backup)
+    private byte[] encryptedAdminKey; // AdminKey bi ma hoa boi PIN Admin
+    private byte[] encryptedMasterKeyByAdmin; // MasterKey bi ma hoa boi AdminKey
     private byte[] adminSalt; // Muoi (Salt) rieng cho Admin
 
     // --- CONG CU TINH TOAN (ENGINES) ---
@@ -55,6 +57,7 @@ public class SecurityManager {
     public SecurityManager() {
         // 1. Khoi tao cac Key rong
         masterKey = (AESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_AES, KeyBuilder.LENGTH_AES_128, false);
+        adminKey = (AESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_AES, KeyBuilder.LENGTH_AES_128, false);
         tempKey = (AESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_AES, KeyBuilder.LENGTH_AES_128, false);
 
         // 2. Init Storage cho Keys
@@ -80,6 +83,7 @@ public class SecurityManager {
         cardSalt = new byte[16];
 
         adminPinHash = new byte[32]; // SHA-256
+        encryptedAdminKey = new byte[16];
         encryptedMasterKeyByAdmin = new byte[16];
         adminSalt = new byte[16];
 
@@ -253,12 +257,24 @@ public class SecurityManager {
             aesCipher.init(tempKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
             aesCipher.doFinal(scratch, (short) 16, (short) 16, encryptedMasterKey, (short) 0);
 
-            // 5. Ma hoa MasterKey bang PIN Admin (Backup)
+            // 5. Ma hoa MasterKey bang AdminKey
+            // A. Sinh AdminKey ngau nhien -> scratch[48..63]
+            random.generateData(scratch, (short) 48, (short) 16);
+            // Luu AdminKey vao doi tuong de dung ngay
+            adminKey.setKey(scratch, (short) 48);
+
+            // B. Ma hoa AdminKey bang PIN Admin -> encryptedAdminKey
             random.generateData(adminSalt, (short) 0, (short) 16);
             pbkdf2.derive(buffer, adminPinOff, (short) 6, adminSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS,
                     scratch, (short) 64);
             tempKey.setKey(scratch, (short) 64);
             aesCipher.init(tempKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
+            // Encrypt AdminKey (from scratch[48])
+            aesCipher.doFinal(scratch, (short) 48, (short) 16, encryptedAdminKey, (short) 0);
+
+            // C. Ma hoa MasterKey (from scratch[16]) bang AdminKey ->
+            // encryptedMasterKeyByAdmin
+            aesCipher.init(adminKey, Cipher.MODE_ENCRYPT, zeroIV, (short) 0, (short) 16);
             aesCipher.doFinal(scratch, (short) 16, (short) 16, encryptedMasterKeyByAdmin, (short) 0);
 
             isSetup = true;
@@ -286,11 +302,21 @@ public class SecurityManager {
 
         JCSystem.beginTransaction();
         try {
-            // 1. Dung PIN Admin de giai ma MasterKey -> scratch[16..31]
+            // 1. Giai ma AdminKey bang PIN Admin
+            // Derive PIN -> scratch[64]
             pbkdf2.derive(buffer, adminPinOff, (short) 6, adminSalt, (short) 0, (short) 16, Constants.PBKDF2_ITERATIONS,
                     scratch, (short) 64);
             tempKey.setKey(scratch, (short) 64);
+
+            // Decrypt EncryptedAdminKey -> scratch[48]
             aesCipher.init(tempKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
+            aesCipher.doFinal(encryptedAdminKey, (short) 0, (short) 16, scratch, (short) 48);
+
+            // Set vao doi tuong AdminKey
+            adminKey.setKey(scratch, (short) 48);
+
+            // 2. Giai ma MasterKey bang AdminKey -> scratch[16]
+            aesCipher.init(adminKey, Cipher.MODE_DECRYPT, zeroIV, (short) 0, (short) 16);
             aesCipher.doFinal(encryptedMasterKeyByAdmin, (short) 0, (short) 16, scratch, (short) 16);
 
             // 2. Key Rotation (Optional nhung nen lam)
