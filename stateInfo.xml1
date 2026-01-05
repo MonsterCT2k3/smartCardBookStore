@@ -13,10 +13,6 @@
 <line>68</line>
 </fnode>
 <fnode>
-<fileName>src\applet\MainApplet.java</fileName>
-<line>11</line>
-</fnode>
-<fnode>
 <fileName>src\crypto\Pbkdf2HmacSha256.java</fileName>
 <line>21</line>
 </fnode>
@@ -24,9 +20,13 @@
 <fileName>src\crypto\SecurityManager.java</fileName>
 <line>311</line>
 </fnode>
-<ActiveFile>
+<fnode>
 <fileName>src\common\Constants.java</fileName>
 <line>31</line>
+</fnode>
+<ActiveFile>
+<fileName>src\applet\MainApplet.java</fileName>
+<line>201</line>
 </ActiveFile>
 </FileNodes>
 </StateInfo>

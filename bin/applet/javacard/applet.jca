@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Thu Dec 18 23:08:36 ICT 2025
+// on Mon Jan 05 18:47:00 ICT 2026
 
 .package applet {
 	.aid 0x11:0x22:0x33:0x44:0x55:0x3;
@@ -176,36 +176,118 @@
 			.descriptor	Ljavacard/security/AESKey;	4.20;
 
 		// 53
-		virtualMethodRef 3.0.1(S[BSSLjavacard/security/AESKey;)V;		// write(S[BSSLjavacard/security/AESKey;)V
+		virtualMethodRef 3.0.1([BSLjavacard/security/AESKey;)V;		// writeCardId([BSLjavacard/security/AESKey;)V
 			.descriptor	Ljavacard/security/AESKey;	4.20;
 
 		// 54
-		staticMethodRef 0.16.3([BSSB)S;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+		virtualMethodRef 3.0.3([BSLjavacard/security/AESKey;)V;		// writeFullName([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
 		// 55
-		virtualMethodRef 2.1.16(Z)V;		// setFirstLogin(Z)V
+		virtualMethodRef 3.0.5([BSLjavacard/security/AESKey;)V;		// writeDob([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
 		// 56
-		virtualMethodRef 0.10.7()S;		// setOutgoing()S
+		virtualMethodRef 3.0.7([BSLjavacard/security/AESKey;)V;		// writePhone([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
 		// 57
-		virtualMethodRef 0.10.9(S)V;		// setOutgoingLength(S)V
+		virtualMethodRef 3.0.9([BSLjavacard/security/AESKey;)V;		// writeAddress([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
 		// 58
-		virtualMethodRef 3.0.2(SS[BSLjavacard/security/AESKey;)V;		// read(SS[BSLjavacard/security/AESKey;)V
+		virtualMethodRef 3.0.11([BSLjavacard/security/AESKey;)V;		// writeRegDate([BSLjavacard/security/AESKey;)V
 			.descriptor	Ljavacard/security/AESKey;	4.20;
 
 		// 59
-		virtualMethodRef 0.10.4(SS)V;		// sendBytes(SS)V
+		virtualMethodRef 3.0.23([BS)V;		// writeAppPublicKey([BS)V
 		// 60
-		virtualMethodRef 2.1.8([BSS[BS)S;		// signData([BSS[BS)S
+		staticMethodRef 0.16.3([BSSB)S;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 		// 61
-		virtualMethodRef 2.1.15()B;		// getPinTries()B
+		virtualMethodRef 3.0.13([BSLjavacard/security/AESKey;)V;		// writeBalance([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
 		// 62
-		staticMethodRef MainApplet/addBigNumber([BS[BSS)V;
+		virtualMethodRef 3.0.15([BSLjavacard/security/AESKey;)V;		// writePoints([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
 		// 63
-		staticMethodRef MainApplet/compareBigNumber([BS[BSS)B;
+		virtualMethodRef 3.0.17([BSLjavacard/security/AESKey;)V;		// writeMemberType([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
 		// 64
-		staticMethodRef MainApplet/subtractBigNumber([BS[BSS)V;
+		virtualMethodRef 3.0.19([BSLjavacard/security/AESKey;)V;		// writeBorrowData([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
 		// 65
-		staticMethodRef 0.16.0([BS[BSS)B;		// javacard/framework/Util.arrayCompare([BS[BSS)B
+		virtualMethodRef 2.1.16(Z)V;		// setFirstLogin(Z)V
 		// 66
+		virtualMethodRef 0.10.7()S;		// setOutgoing()S
+		// 67
+		virtualMethodRef 0.10.9(S)V;		// setOutgoingLength(S)V
+		// 68
+		virtualMethodRef 3.0.2([BSLjavacard/security/AESKey;)V;		// readCardId([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 69
+		virtualMethodRef 0.10.4(SS)V;		// sendBytes(SS)V
+		// 70
+		virtualMethodRef 2.1.8([BSS[BS)S;		// signData([BSS[BS)S
+		// 71
+		virtualMethodRef 2.1.15()B;		// getPinTries()B
+		// 72
+		virtualMethodRef 3.0.4([BSLjavacard/security/AESKey;)V;		// readFullName([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 73
+		virtualMethodRef 3.0.6([BSLjavacard/security/AESKey;)V;		// readDob([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 74
+		virtualMethodRef 3.0.8([BSLjavacard/security/AESKey;)V;		// readPhone([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 75
+		virtualMethodRef 3.0.10([BSLjavacard/security/AESKey;)V;		// readAddress([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 76
+		virtualMethodRef 3.0.12([BSLjavacard/security/AESKey;)V;		// readRegDate([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 77
+		virtualMethodRef 3.0.18([BSLjavacard/security/AESKey;)V;		// readMemberType([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 78
+		virtualMethodRef 3.0.16([BSLjavacard/security/AESKey;)V;		// readPoints([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 79
+		staticMethodRef MainApplet/addBigNumber([BS[BSS)V;
+		// 80
+		staticMethodRef MainApplet/compareBigNumber([BS[BSS)B;
+		// 81
+		staticMethodRef MainApplet/subtractBigNumber([BS[BSS)V;
+		// 82
+		virtualMethodRef 3.0.20([BSLjavacard/security/AESKey;)V;		// readBorrowData([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 83
+		staticMethodRef 0.16.0([BS[BSS)B;		// javacard/framework/Util.arrayCompare([BS[BSS)B
+		// 84
+		virtualMethodRef 3.0.21(S[BSSLjavacard/security/AESKey;)V;		// writeImageChunk(S[BSSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 85
+		virtualMethodRef 3.0.22(SS[BSLjavacard/security/AESKey;)V;		// readImageChunk(SS[BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 86
+		virtualMethodRef 3.0.14([BSLjavacard/security/AESKey;)V;		// readBalance([BSLjavacard/security/AESKey;)V
+			.descriptor	Ljavacard/security/AESKey;	4.20;
+
+		// 87
 		virtualMethodRef 2.1.17()Z;		// isFirstLogin()Z
 	}
 
@@ -530,7 +612,7 @@
 		}
 
 		.method private handleInitData(Ljavacard/framework/APDU;)V {
-			.stack 6;
+			.stack 5;
 			.locals 5;
 
 			.descriptor	Ljavacard/framework/APDU;	0.10;
@@ -584,108 +666,85 @@
 				L9:	sconst_0;
 					sstore 6;
 				L10:	getfield_a_this 1;		// reference applet/MainApplet.repository
-					sconst_0;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sload 6;
-					bspush 16;
 					aload 5;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 53;		// writeCardId([BSLjavacard/security/AESKey;)V
 					sinc 6 16;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 16;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sload 6;
-					bspush 64;
 					aload 5;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 54;		// writeFullName([BSLjavacard/security/AESKey;)V
 					sinc 6 64;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 80;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sload 6;
-					bspush 16;
 					aload 5;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 55;		// writeDob([BSLjavacard/security/AESKey;)V
 					sinc 6 16;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 96;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sload 6;
-					bspush 16;
 					aload 5;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 56;		// writePhone([BSLjavacard/security/AESKey;)V
 					sinc 6 16;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 112;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sload 6;
-					bspush 64;
 					aload 5;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 57;		// writeAddress([BSLjavacard/security/AESKey;)V
 					sinc 6 64;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 176;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sload 6;
-					bspush 16;
 					aload 5;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 58;		// writeRegDate([BSLjavacard/security/AESKey;)V
 					sinc 6 16;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 192;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sload 6;
-					sspush 128;
-					aload 5;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 59;		// writeAppPublicKey([BS)V
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					bspush 16;
 					sconst_0;
-					invokestatic 54;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 60;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 320;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
-					bspush 16;
 					aload 5;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 61;		// writeBalance([BSLjavacard/security/AESKey;)V
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 336;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
-					bspush 16;
 					aload 5;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 62;		// writePoints([BSLjavacard/security/AESKey;)V
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 352;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
-					bspush 16;
 					aload 5;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 63;		// writeMemberType([BSLjavacard/security/AESKey;)V
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					sspush 240;
 					sconst_0;
-					invokestatic 54;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 60;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 368;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
-					sspush 240;
 					aload 5;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 64;		// writeBorrowData([BSLjavacard/security/AESKey;)V
 					getfield_a_this 0;		// reference applet/MainApplet.secManager
 					sconst_1;
-					invokevirtual 55;		// setFirstLogin(Z)V
+					invokevirtual 65;		// setFirstLogin(Z)V
 					return;
 		}
 
 		.method private handleUpdateInfo(Ljavacard/framework/APDU;)V {
-			.stack 6;
+			.stack 5;
 			.locals 5;
 
 			.descriptor	Ljavacard/framework/APDU;	0.10;
@@ -742,42 +801,34 @@
 				L10:	sconst_0;
 					sstore 6;
 				L11:	getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 16;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sload 6;
-					bspush 64;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 54;		// writeFullName([BSLjavacard/security/AESKey;)V
 					sinc 6 64;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 80;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sload 6;
-					bspush 16;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 55;		// writeDob([BSLjavacard/security/AESKey;)V
 					sinc 6 16;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 96;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sload 6;
-					bspush 16;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 56;		// writePhone([BSLjavacard/security/AESKey;)V
 					sinc 6 16;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 112;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sload 6;
-					bspush 64;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 57;		// writeAddress([BSLjavacard/security/AESKey;)V
 					sinc 6 64;
 					return;
 		}
 
 		.method private handleAuthGetCardId(Ljavacard/framework/APDU;)V {
-			.stack 6;
+			.stack 4;
 			.locals 2;
 
 			.descriptor	Ljavacard/framework/APDU;	0.10;
@@ -789,22 +840,20 @@
 					invokevirtual 52;		// getMasterKey()Ljavacard/security/AESKey;
 					astore_3;
 				L2:	aload_1;
-					invokevirtual 56;		// setOutgoing()S
+					invokevirtual 66;		// setOutgoing()S
 					pop;
 					aload_1;
 					bspush 16;
-					invokevirtual 57;		// setOutgoingLength(S)V
+					invokevirtual 67;		// setOutgoingLength(S)V
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sconst_0;
-					bspush 16;
 					aload_2;
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 68;		// readCardId([BSLjavacard/security/AESKey;)V
 					aload_1;
 					sconst_0;
 					bspush 16;
-					invokevirtual 59;		// sendBytes(SS)V
+					invokevirtual 69;		// sendBytes(SS)V
 					return;
 		}
 
@@ -826,7 +875,7 @@
 					sload_3;
 					aload_2;
 					sconst_0;
-					invokevirtual 60;		// signData([BSS[BS)S
+					invokevirtual 70;		// signData([BSS[BS)S
 					sstore 4;
 				L3:	aload_1;
 					sconst_0;
@@ -845,7 +894,7 @@
 					invokevirtual 13;		// getBuffer()[B
 					astore_2;
 				L1:	getfield_a_this 0;		// reference applet/MainApplet.secManager
-					invokevirtual 61;		// getPinTries()B
+					invokevirtual 71;		// getPinTries()B
 					sstore_3;
 				L2:	aload_2;
 					sconst_0;
@@ -859,7 +908,7 @@
 		}
 
 		.method private handleGetInfoSecure(Ljavacard/framework/APDU;)V {
-			.stack 6;
+			.stack 4;
 			.locals 3;
 
 			.descriptor	Ljavacard/framework/APDU;	0.10;
@@ -871,67 +920,53 @@
 					invokevirtual 52;		// getMasterKey()Ljavacard/security/AESKey;
 					astore_3;
 				L2:	aload_1;
-					invokevirtual 56;		// setOutgoing()S
+					invokevirtual 66;		// setOutgoing()S
 					pop;
 					aload_1;
 					sspush 193;
-					invokevirtual 57;		// setOutgoingLength(S)V
+					invokevirtual 67;		// setOutgoingLength(S)V
 					sconst_0;
 					sstore 4;
 				L3:	getfield_a_this 1;		// reference applet/MainApplet.repository
-					sconst_0;
-					bspush 16;
 					aload_2;
 					sload 4;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 68;		// readCardId([BSLjavacard/security/AESKey;)V
 					sinc 4 16;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 16;
-					bspush 64;
 					aload_2;
 					sload 4;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 72;		// readFullName([BSLjavacard/security/AESKey;)V
 					sinc 4 64;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 80;
-					bspush 16;
 					aload_2;
 					sload 4;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 73;		// readDob([BSLjavacard/security/AESKey;)V
 					sinc 4 16;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 96;
-					bspush 16;
 					aload_2;
 					sload 4;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 74;		// readPhone([BSLjavacard/security/AESKey;)V
 					sinc 4 16;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					bspush 112;
-					bspush 64;
 					aload_2;
 					sload 4;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 75;		// readAddress([BSLjavacard/security/AESKey;)V
 					sinc 4 64;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 176;
-					bspush 16;
 					aload_2;
 					sload 4;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 76;		// readRegDate([BSLjavacard/security/AESKey;)V
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 352;
-					bspush 16;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 77;		// readMemberType([BSLjavacard/security/AESKey;)V
 					aload_2;
 					sspush 192;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
@@ -941,7 +976,7 @@
 					aload_1;
 					sconst_0;
 					sspush 193;
-					invokevirtual 59;		// sendBytes(SS)V
+					invokevirtual 69;		// sendBytes(SS)V
 					return;
 		}
 
@@ -966,12 +1001,10 @@
 				L4:	sspush 26368;
 					invokestatic 15;		// javacard/framework/ISOException.throwIt(S)V
 				L5:	getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 336;
-					bspush 16;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 78;		// readPoints([BSLjavacard/security/AESKey;)V
 					aload_0;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
@@ -979,14 +1012,12 @@
 					aload_1;
 					invokevirtual 49;		// getOffsetCdata()S
 					sconst_4;
-					invokespecial 62;		// applet/MainApplet.addBigNumber([BS[BSS)V
+					invokespecial 79;		// applet/MainApplet.addBigNumber([BS[BSS)V
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 336;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
-					bspush 16;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 62;		// writePoints([BSLjavacard/security/AESKey;)V
 					return;
 		}
 
@@ -1011,12 +1042,10 @@
 				L4:	sspush 26368;
 					invokestatic 15;		// javacard/framework/ISOException.throwIt(S)V
 				L5:	getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 336;
-					bspush 16;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 78;		// readPoints([BSLjavacard/security/AESKey;)V
 					aload_0;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
@@ -1024,7 +1053,7 @@
 					aload_1;
 					invokevirtual 49;		// getOffsetCdata()S
 					sconst_4;
-					invokespecial 63;		// applet/MainApplet.compareBigNumber([BS[BSS)B
+					invokespecial 80;		// applet/MainApplet.compareBigNumber([BS[BSS)B
 					sstore 5;
 				L6:	sload 5;
 					ifge L8;
@@ -1037,19 +1066,17 @@
 					aload_1;
 					invokevirtual 49;		// getOffsetCdata()S
 					sconst_4;
-					invokespecial 64;		// applet/MainApplet.subtractBigNumber([BS[BSS)V
+					invokespecial 81;		// applet/MainApplet.subtractBigNumber([BS[BSS)V
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 336;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
-					bspush 16;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 62;		// writePoints([BSLjavacard/security/AESKey;)V
 					return;
 		}
 
 		.method private handleUpgradeMember(Ljavacard/framework/APDU;B)V {
-			.stack 6;
+			.stack 4;
 			.locals 1;
 
 			.descriptor	Ljavacard/framework/APDU;	0.10;
@@ -1061,24 +1088,22 @@
 					sconst_0;
 					bspush 16;
 					sconst_0;
-					invokestatic 54;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 60;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					sload_2;
 					bastore;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 352;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
-					bspush 16;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 63;		// writeMemberType([BSLjavacard/security/AESKey;)V
 					return;
 		}
 
 		.method private handleBorrowBook(Ljavacard/framework/APDU;)V {
-			.stack 6;
+			.stack 5;
 			.locals 10;
 
 			.descriptor	Ljavacard/framework/APDU;	0.10;
@@ -1098,12 +1123,10 @@
 				L4:	sspush 26368;
 					invokestatic 15;		// javacard/framework/ISOException.throwIt(S)V
 				L5:	getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 368;
-					sspush 240;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 82;		// readBorrowData([BSLjavacard/security/AESKey;)V
 					sconst_m1;
 					sstore 5;
 				L6:	bspush 16;
@@ -1144,7 +1167,7 @@
 					aload_2;
 					sload 7;
 					bspush 6;
-					invokestatic 65;		// javacard/framework/Util.arrayCompare([BS[BSS)B
+					invokestatic 83;		// javacard/framework/Util.arrayCompare([BS[BSS)B
 					ifne L22;
 				L19:	sspush 25344;
 					invokestatic 15;		// javacard/framework/ISOException.throwIt(S)V
@@ -1169,17 +1192,15 @@
 					invokestatic 50;		// javacard/framework/Util.arrayCopy([BS[BSS)S
 					pop;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 368;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
-					sspush 240;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 64;		// writeBorrowData([BSLjavacard/security/AESKey;)V
 					return;
 		}
 
 		.method private handleReturnBook(Ljavacard/framework/APDU;)V {
-			.stack 6;
+			.stack 5;
 			.locals 8;
 
 			.descriptor	Ljavacard/framework/APDU;	0.10;
@@ -1199,12 +1220,10 @@
 				L4:	sspush 26368;
 					invokestatic 15;		// javacard/framework/ISOException.throwIt(S)V
 				L5:	getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 368;
-					sspush 240;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 82;		// readBorrowData([BSLjavacard/security/AESKey;)V
 					sconst_m1;
 					sstore 5;
 				L6:	bspush 16;
@@ -1225,7 +1244,7 @@
 					aload_2;
 					sload 7;
 					bspush 6;
-					invokestatic 65;		// javacard/framework/Util.arrayCompare([BS[BSS)B
+					invokestatic 83;		// javacard/framework/Util.arrayCompare([BS[BSS)B
 					ifne L13;
 				L12:	sload 9;
 					sstore 5;
@@ -1241,20 +1260,18 @@
 					sload 5;
 					sload 6;
 					sconst_0;
-					invokestatic 54;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 60;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 368;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
-					sspush 240;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 64;		// writeBorrowData([BSLjavacard/security/AESKey;)V
 					return;
 		}
 
 		.method private handleGetBorrowedBooks(Ljavacard/framework/APDU;)V {
-			.stack 6;
+			.stack 4;
 			.locals 2;
 
 			.descriptor	Ljavacard/framework/APDU;	0.10;
@@ -1266,22 +1283,20 @@
 					invokevirtual 52;		// getMasterKey()Ljavacard/security/AESKey;
 					astore_3;
 				L2:	aload_1;
-					invokevirtual 56;		// setOutgoing()S
+					invokevirtual 66;		// setOutgoing()S
 					pop;
 					aload_1;
 					sspush 240;
-					invokevirtual 57;		// setOutgoingLength(S)V
+					invokevirtual 67;		// setOutgoingLength(S)V
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 368;
-					sspush 240;
 					aload_2;
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 82;		// readBorrowData([BSLjavacard/security/AESKey;)V
 					aload_1;
 					sconst_0;
 					sspush 240;
-					invokevirtual 59;		// sendBytes(SS)V
+					invokevirtual 69;		// sendBytes(SS)V
 					return;
 		}
 
@@ -1326,14 +1341,12 @@
 					sload 8;
 					if_scmplt L12;
 				L10:	getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 608;
 					sload 6;
-					sadd;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					sload 8;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 84;		// writeImageChunk(S[BSSLjavacard/security/AESKey;)V
 					sload 6;
 					sload 8;
 					sadd;
@@ -1381,14 +1394,12 @@
 				L16:	sload 7;
 					ifle L18;
 				L17:	getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 608;
 					sload 6;
-					sadd;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					sload 7;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 84;		// writeImageChunk(S[BSSLjavacard/security/AESKey;)V
 				L18:	return;
 		}
 
@@ -1430,7 +1441,7 @@
 				L7:	sspush 27270;
 					invokestatic 15;		// javacard/framework/ISOException.throwIt(S)V
 				L8:	aload_1;
-					invokevirtual 56;		// setOutgoing()S
+					invokevirtual 66;		// setOutgoing()S
 					sstore 7;
 				L9:	sload 6;
 					sload 7;
@@ -1443,25 +1454,23 @@
 					sstore 7;
 				L11:	aload_1;
 					sload 7;
-					invokevirtual 57;		// setOutgoingLength(S)V
+					invokevirtual 67;		// setOutgoingLength(S)V
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 608;
 					sload 6;
-					sadd;
 					sload 7;
 					aload_2;
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 85;		// readImageChunk(SS[BSLjavacard/security/AESKey;)V
 					aload_1;
 					sconst_0;
 					sload 7;
-					invokevirtual 59;		// sendBytes(SS)V
+					invokevirtual 69;		// sendBytes(SS)V
 					return;
 		}
 
 		.method private handleGetBalance(Ljavacard/framework/APDU;)V {
-			.stack 6;
+			.stack 5;
 			.locals 2;
 
 			.descriptor	Ljavacard/framework/APDU;	0.10;
@@ -1473,18 +1482,16 @@
 					invokevirtual 52;		// getMasterKey()Ljavacard/security/AESKey;
 					astore_3;
 				L2:	aload_1;
-					invokevirtual 56;		// setOutgoing()S
+					invokevirtual 66;		// setOutgoing()S
 					pop;
 					aload_1;
 					bspush 8;
-					invokevirtual 57;		// setOutgoingLength(S)V
+					invokevirtual 67;		// setOutgoingLength(S)V
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 320;
-					bspush 16;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 86;		// readBalance([BSLjavacard/security/AESKey;)V
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					aload_2;
@@ -1493,12 +1500,10 @@
 					invokestatic 50;		// javacard/framework/Util.arrayCopy([BS[BSS)S
 					pop;
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 336;
-					bspush 16;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 78;		// readPoints([BSLjavacard/security/AESKey;)V
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					aload_2;
@@ -1509,7 +1514,7 @@
 					aload_1;
 					sconst_0;
 					bspush 8;
-					invokevirtual 59;		// sendBytes(SS)V
+					invokevirtual 69;		// sendBytes(SS)V
 					return;
 		}
 
@@ -1534,12 +1539,10 @@
 				L4:	sspush 26368;
 					invokestatic 15;		// javacard/framework/ISOException.throwIt(S)V
 				L5:	getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 320;
-					bspush 16;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 86;		// readBalance([BSLjavacard/security/AESKey;)V
 					aload_0;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
@@ -1547,14 +1550,12 @@
 					aload_1;
 					invokevirtual 49;		// getOffsetCdata()S
 					sconst_4;
-					invokespecial 62;		// applet/MainApplet.addBigNumber([BS[BSS)V
+					invokespecial 79;		// applet/MainApplet.addBigNumber([BS[BSS)V
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 320;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
-					bspush 16;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 61;		// writeBalance([BSLjavacard/security/AESKey;)V
 					return;
 		}
 
@@ -1579,12 +1580,10 @@
 				L4:	sspush 26368;
 					invokestatic 15;		// javacard/framework/ISOException.throwIt(S)V
 				L5:	getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 320;
-					bspush 16;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
 					aload_3;
-					invokevirtual 58;		// read(SS[BSLjavacard/security/AESKey;)V
+					invokevirtual 86;		// readBalance([BSLjavacard/security/AESKey;)V
 					aload_0;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
@@ -1592,7 +1591,7 @@
 					aload_1;
 					invokevirtual 49;		// getOffsetCdata()S
 					sconst_4;
-					invokespecial 63;		// applet/MainApplet.compareBigNumber([BS[BSS)B
+					invokespecial 80;		// applet/MainApplet.compareBigNumber([BS[BSS)B
 					sstore 5;
 				L6:	sload 5;
 					ifge L8;
@@ -1605,14 +1604,12 @@
 					aload_1;
 					invokevirtual 49;		// getOffsetCdata()S
 					sconst_4;
-					invokespecial 64;		// applet/MainApplet.subtractBigNumber([BS[BSS)V
+					invokespecial 81;		// applet/MainApplet.subtractBigNumber([BS[BSS)V
 					getfield_a_this 1;		// reference applet/MainApplet.repository
-					sspush 320;
 					getfield_a_this 2;		// reference applet/MainApplet.tempBufferRam
 					sconst_0;
-					bspush 16;
 					aload_3;
-					invokevirtual 53;		// write(S[BSSLjavacard/security/AESKey;)V
+					invokevirtual 61;		// writeBalance([BSLjavacard/security/AESKey;)V
 					return;
 		}
 
@@ -1768,7 +1765,7 @@
 				L1:	aload_2;
 					sconst_0;
 					getfield_a_this 0;		// reference applet/MainApplet.secManager
-					invokevirtual 66;		// isFirstLogin()Z
+					invokevirtual 87;		// isFirstLogin()Z
 					ifeq L3;
 				L2:	sconst_1;
 					goto L4;
@@ -1789,7 +1786,7 @@
 
 				L0:	getfield_a_this 0;		// reference applet/MainApplet.secManager
 					sconst_0;
-					invokevirtual 55;		// setFirstLogin(Z)V
+					invokevirtual 65;		// setFirstLogin(Z)V
 					return;
 		}
 

@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Thu Dec 11 15:58:41 ICT 2025
+// on Mon Jan 05 18:46:59 ICT 2026
 
 .package storage {
 	.aid 0x11:0x22:0x33:0x44:0x55:0x2;
@@ -14,60 +14,125 @@
 
 	.constantPool {
 		// 0
-		instanceFieldRef byte[] DataRepository/dataBlob;
+		instanceFieldRef byte[] DataRepository/cardId;
 		// 1
-		instanceFieldRef 1.1 DataRepository/aesCipher;
+		instanceFieldRef byte[] DataRepository/fullName;
 		// 2
-		instanceFieldRef byte[] DataRepository/ivBuffer;
+		instanceFieldRef byte[] DataRepository/dob;
 		// 3
-		instanceFieldRef byte[] DataRepository/tempBlock;
+		instanceFieldRef byte[] DataRepository/phone;
 		// 4
-		staticMethodRef 2.8.13(SB)[B;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+		instanceFieldRef byte[] DataRepository/address;
 		// 5
+		instanceFieldRef byte[] DataRepository/regDate;
+		// 6
+		instanceFieldRef byte[] DataRepository/appPublicKey;
+		// 7
+		instanceFieldRef byte[] DataRepository/balance;
+		// 8
+		instanceFieldRef byte[] DataRepository/points;
+		// 9
+		instanceFieldRef byte[] DataRepository/memberType;
+		// 10
+		instanceFieldRef byte[] DataRepository/borrowData;
+		// 11
+		instanceFieldRef byte[] DataRepository/image;
+		// 12
+		instanceFieldRef 1.1 DataRepository/aesCipher;
+		// 13
+		instanceFieldRef byte[] DataRepository/ivBuffer;
+		// 14
+		instanceFieldRef byte[] DataRepository/tempBlock;
+		// 15
+		staticMethodRef 2.8.13(SB)[B;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+		// 16
 		staticMethodRef 1.1.0(BZ)Ljavacardx/crypto/Cipher;;		// javacardx/crypto/Cipher.getInstance(BZ)Ljavacardx/crypto/Cipher;
 			.descriptor	Ljavacardx/crypto/Cipher;	1.1;
 
-		// 6
+		// 17
 		staticMethodRef 0.0.0()V;		// java/lang/Object.<init>()V
-		// 7
+		// 18
 		staticMethodRef 2.16.3([BSSB)S;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
-		// 8
+		// 19
 		.classRef 0.2;		// java/lang/Exception
-		// 9
+		// 20
 		staticMethodRef 2.8.1()V;		// javacard/framework/JCSystem.beginTransaction()V
-		// 10
+		// 21
 		staticMethodRef DataRepository/generateIv(S)V;
-		// 11
+		// 22
 		virtualMethodRef 1.1.4(Ljavacard/security/Key;B[BSS)V;		// init(Ljavacard/security/Key;B[BSS)V
 			.descriptor	Ljavacard/security/Key;	3.0;
 
-		// 12
+		// 23
 		virtualMethodRef 1.1.1([BSS[BS)S;		// doFinal([BSS[BS)S
-		// 13
+		// 24
 		virtualMethodRef 1.1.5([BSS[BS)S;		// update([BSS[BS)S
-		// 14
-		staticMethodRef 2.16.1([BS[BSS)S;		// javacard/framework/Util.arrayCopy([BS[BSS)S
-		// 15
+		// 25
+		staticMethodRef 2.16.2([BS[BSS)S;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+		// 26
 		staticMethodRef 2.8.2()V;		// javacard/framework/JCSystem.commitTransaction()V
-		// 16
+		// 27
 		staticMethodRef 2.8.0()V;		// javacard/framework/JCSystem.abortTransaction()V
-		// 17
+		// 28
 		staticMethodRef 2.7.1(S)V;		// javacard/framework/ISOException.throwIt(S)V
+		// 29
+		staticMethodRef DataRepository/writeField([BS[BSSLjavacard/security/AESKey;)V;
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+		// 30
+		staticMethodRef DataRepository/readField([BS[BSLjavacard/security/AESKey;)V;
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+		// 31
+		staticMethodRef 2.16.1([BS[BSS)S;		// javacard/framework/Util.arrayCopy([BS[BSS)S
 	}
 
 	.class public DataRepository 0 extends 0.0 {		// extends java/lang/Object
 
 		.fields {
-			private byte[] dataBlob 0;		// [B
-			private 1.1 aesCipher 1;		// Ljavacardx/crypto/Cipher;
-			private byte[] ivBuffer 2;		// [B
-			private byte[] tempBlock 3;		// [B
+			private byte[] cardId 0;		// [B
+			private byte[] fullName 1;		// [B
+			private byte[] dob 2;		// [B
+			private byte[] phone 3;		// [B
+			private byte[] address 4;		// [B
+			private byte[] regDate 5;		// [B
+			private byte[] appPublicKey 6;		// [B
+			private byte[] balance 7;		// [B
+			private byte[] points 8;		// [B
+			private byte[] memberType 9;		// [B
+			private byte[] borrowData 10;		// [B
+			private byte[] image 11;		// [B
+			private 1.1 aesCipher 12;		// Ljavacardx/crypto/Cipher;
+			private byte[] ivBuffer 13;		// [B
+			private byte[] tempBlock 14;		// [B
 		}
 
 		.publicMethodTable 1 {
 			equals(Ljava/lang/Object;)Z;
-			write(S[BSSLjavacard/security/AESKey;)V;
-			read(SS[BSLjavacard/security/AESKey;)V;
+			writeCardId([BSLjavacard/security/AESKey;)V;
+			readCardId([BSLjavacard/security/AESKey;)V;
+			writeFullName([BSLjavacard/security/AESKey;)V;
+			readFullName([BSLjavacard/security/AESKey;)V;
+			writeDob([BSLjavacard/security/AESKey;)V;
+			readDob([BSLjavacard/security/AESKey;)V;
+			writePhone([BSLjavacard/security/AESKey;)V;
+			readPhone([BSLjavacard/security/AESKey;)V;
+			writeAddress([BSLjavacard/security/AESKey;)V;
+			readAddress([BSLjavacard/security/AESKey;)V;
+			writeRegDate([BSLjavacard/security/AESKey;)V;
+			readRegDate([BSLjavacard/security/AESKey;)V;
+			writeBalance([BSLjavacard/security/AESKey;)V;
+			readBalance([BSLjavacard/security/AESKey;)V;
+			writePoints([BSLjavacard/security/AESKey;)V;
+			readPoints([BSLjavacard/security/AESKey;)V;
+			writeMemberType([BSLjavacard/security/AESKey;)V;
+			readMemberType([BSLjavacard/security/AESKey;)V;
+			writeBorrowData([BSLjavacard/security/AESKey;)V;
+			readBorrowData([BSLjavacard/security/AESKey;)V;
+			writeImageChunk(S[BSSLjavacard/security/AESKey;)V;
+			readImageChunk(SS[BSLjavacard/security/AESKey;)V;
+			writeAppPublicKey([BS)V;
+			readAppPublicKey([BS)V;
 		}
 
 		.packageMethodTable 0 {
@@ -78,26 +143,70 @@
 			.locals 0;
 
 				L0:	aload_0;
-					invokespecial 6;		// java/lang/Object.<init>()V
+					invokespecial 17;		// java/lang/Object.<init>()V
 					aload_0;
-					sspush 24576;
+					bspush 16;
 					newarray 11;
-					putfield_a 0;		// reference storage/DataRepository.dataBlob
+					putfield_a 0;		// reference storage/DataRepository.cardId
+					aload_0;
+					bspush 64;
+					newarray 11;
+					putfield_a 1;		// reference storage/DataRepository.fullName
+					aload_0;
+					bspush 16;
+					newarray 11;
+					putfield_a 2;		// reference storage/DataRepository.dob
+					aload_0;
+					bspush 16;
+					newarray 11;
+					putfield_a 3;		// reference storage/DataRepository.phone
+					aload_0;
+					bspush 64;
+					newarray 11;
+					putfield_a 4;		// reference storage/DataRepository.address
+					aload_0;
+					bspush 16;
+					newarray 11;
+					putfield_a 5;		// reference storage/DataRepository.regDate
+					aload_0;
+					sspush 128;
+					newarray 11;
+					putfield_a 6;		// reference storage/DataRepository.appPublicKey
+					aload_0;
+					bspush 16;
+					newarray 11;
+					putfield_a 7;		// reference storage/DataRepository.balance
+					aload_0;
+					bspush 16;
+					newarray 11;
+					putfield_a 8;		// reference storage/DataRepository.points
+					aload_0;
+					bspush 16;
+					newarray 11;
+					putfield_a 9;		// reference storage/DataRepository.memberType
+					aload_0;
+					sspush 240;
+					newarray 11;
+					putfield_a 10;		// reference storage/DataRepository.borrowData
+					aload_0;
+					sspush 20480;
+					newarray 11;
+					putfield_a 11;		// reference storage/DataRepository.image
 					aload_0;
 					bspush 13;
 					sconst_0;
-					invokestatic 5;		// javacardx/crypto/Cipher.getInstance(BZ)Ljavacardx/crypto/Cipher;
-					putfield_a 1;		// reference storage/DataRepository.aesCipher
+					invokestatic 16;		// javacardx/crypto/Cipher.getInstance(BZ)Ljavacardx/crypto/Cipher;
+					putfield_a 12;		// reference storage/DataRepository.aesCipher
 					aload_0;
 					bspush 16;
 					sconst_1;
-					invokestatic 4;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
-					putfield_a 2;		// reference storage/DataRepository.ivBuffer
+					invokestatic 15;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+					putfield_a 13;		// reference storage/DataRepository.ivBuffer
 					aload_0;
 					bspush 16;
 					sconst_1;
-					invokestatic 4;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
-					putfield_a 3;		// reference storage/DataRepository.tempBlock
+					invokestatic 15;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+					putfield_a 14;		// reference storage/DataRepository.tempBlock
 					return;
 		}
 
@@ -105,20 +214,20 @@
 			.stack 4;
 			.locals 0;
 
-				L0:	getfield_a_this 2;		// reference storage/DataRepository.ivBuffer
+				L0:	getfield_a_this 13;		// reference storage/DataRepository.ivBuffer
 					sconst_0;
 					bspush 16;
 					sconst_0;
-					invokestatic 7;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 18;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
-					getfield_a_this 2;		// reference storage/DataRepository.ivBuffer
+					getfield_a_this 13;		// reference storage/DataRepository.ivBuffer
 					bspush 14;
 					sload_1;
 					bspush 8;
 					sshr;
 					s2b;
 					bastore;
-					getfield_a_this 2;		// reference storage/DataRepository.ivBuffer
+					getfield_a_this 13;		// reference storage/DataRepository.ivBuffer
 					bspush 15;
 					sload_1;
 					sspush 255;
@@ -128,115 +237,559 @@
 					return;
 		}
 
-		.method public write(S[BSSLjavacard/security/AESKey;)V 1 {
-			.stack 7;
+		.method private writeField([BS[BSSLjavacard/security/AESKey;)V {
+			.stack 6;
 			.locals 2;
 
 			.descriptor	Ljavacard/security/AESKey;	3.20;
 
-				L0:	invokestatic 9;		// javacard/framework/JCSystem.beginTransaction()V
-				L1:	aload_0;
-					sload_1;
-					invokespecial 10;		// storage/DataRepository.generateIv(S)V
-					getfield_a_this 1;		// reference storage/DataRepository.aesCipher
-					aload 5;
+				L0:	sload 5;
+					aload_1;
+					arraylength;
+					if_scmple L2;
+				L1:	aload_1;
+					arraylength;
+					sstore 5;
+				L2:	invokestatic 20;		// javacard/framework/JCSystem.beginTransaction()V
+				L3:	aload_0;
+					sload_2;
+					invokespecial 21;		// storage/DataRepository.generateIv(S)V
+					getfield_a_this 12;		// reference storage/DataRepository.aesCipher
+					aload 6;
 					sconst_2;
-					getfield_a_this 2;		// reference storage/DataRepository.ivBuffer
+					getfield_a_this 13;		// reference storage/DataRepository.ivBuffer
 					sconst_0;
 					bspush 16;
-					invokevirtual 11;		// init(Ljavacard/security/Key;B[BSS)V
-					sload 4;
+					invokevirtual 22;		// init(Ljavacard/security/Key;B[BSS)V
+					sload 5;
 					bspush 16;
 					srem;
-					sstore 6;
-				L2:	sload 4;
-					sload 6;
-					ssub;
 					sstore 7;
-				L3:	sload 6;
-					ifne L5;
-				L4:	getfield_a_this 1;		// reference storage/DataRepository.aesCipher
-					aload_2;
-					sload_3;
-					sload 4;
-					getfield_a_this 0;		// reference storage/DataRepository.dataBlob
-					sload_1;
-					invokevirtual 12;		// doFinal([BSS[BS)S
-					pop;
-					goto L8;
+				L4:	sload 5;
+					sload 7;
+					ssub;
+					sstore 8;
 				L5:	sload 7;
-					ifle L7;
-				L6:	getfield_a_this 1;		// reference storage/DataRepository.aesCipher
-					aload_2;
-					sload_3;
-					sload 7;
-					getfield_a_this 0;		// reference storage/DataRepository.dataBlob
-					sload_1;
-					invokevirtual 13;		// update([BSS[BS)S
-					pop;
-				L7:	aload_2;
-					sload_3;
-					sload 7;
-					sadd;
-					getfield_a_this 3;		// reference storage/DataRepository.tempBlock
+					ifne L7;
+				L6:	getfield_a_this 12;		// reference storage/DataRepository.aesCipher
+					aload_3;
+					sload 4;
+					sload 5;
+					aload_1;
 					sconst_0;
-					sload 6;
-					invokestatic 14;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					invokevirtual 23;		// doFinal([BSS[BS)S
 					pop;
-					getfield_a_this 3;		// reference storage/DataRepository.tempBlock
-					sload 6;
+					goto L10;
+				L7:	sload 8;
+					ifle L9;
+				L8:	getfield_a_this 12;		// reference storage/DataRepository.aesCipher
+					aload_3;
+					sload 4;
+					sload 8;
+					aload_1;
+					sconst_0;
+					invokevirtual 24;		// update([BSS[BS)S
+					pop;
+				L9:	aload_3;
+					sload 4;
+					sload 8;
+					sadd;
+					getfield_a_this 14;		// reference storage/DataRepository.tempBlock
+					sconst_0;
+					sload 7;
+					invokestatic 25;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					getfield_a_this 14;		// reference storage/DataRepository.tempBlock
+					sload 7;
 					bspush 16;
-					sload 6;
+					sload 7;
 					ssub;
 					sconst_0;
-					invokestatic 7;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					invokestatic 18;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
 					pop;
-					getfield_a_this 1;		// reference storage/DataRepository.aesCipher
-					getfield_a_this 3;		// reference storage/DataRepository.tempBlock
+					getfield_a_this 12;		// reference storage/DataRepository.aesCipher
+					getfield_a_this 14;		// reference storage/DataRepository.tempBlock
 					sconst_0;
 					bspush 16;
-					getfield_a_this 0;		// reference storage/DataRepository.dataBlob
-					sload_1;
-					sload 7;
-					sadd;
-					invokevirtual 12;		// doFinal([BSS[BS)S
+					aload_1;
+					sload 8;
+					invokevirtual 23;		// doFinal([BSS[BS)S
 					pop;
-				L8:	invokestatic 15;		// javacard/framework/JCSystem.commitTransaction()V
-				L9:	goto L12;
-				L10:	astore 6;
-				L11:	invokestatic 16;		// javacard/framework/JCSystem.abortTransaction()V
-					sspush 28416;
-					invokestatic 17;		// javacard/framework/ISOException.throwIt(S)V
-				L12:	return;
+				L10:	invokestatic 26;		// javacard/framework/JCSystem.commitTransaction()V
+				L11:	goto L14;
+				L12:	astore 7;
+				L13:	invokestatic 27;		// javacard/framework/JCSystem.abortTransaction()V
+					sspush 28417;
+					invokestatic 28;		// javacard/framework/ISOException.throwIt(S)V
+				L14:	return;
 			.exceptionTable {
 				// start_block end_block handler_block catch_type_index
-				L1 L9 L10 8;
+				L3 L11 L12 19;
 			}
 		}
 
-		.method public read(SS[BSLjavacard/security/AESKey;)V 2 {
+		.method private readField([BS[BSLjavacard/security/AESKey;)V {
 			.stack 6;
 			.locals 0;
 
 			.descriptor	Ljavacard/security/AESKey;	3.20;
 
 				L0:	aload_0;
-					sload_1;
-					invokespecial 10;		// storage/DataRepository.generateIv(S)V
-					getfield_a_this 1;		// reference storage/DataRepository.aesCipher
+					sload_2;
+					invokespecial 21;		// storage/DataRepository.generateIv(S)V
+					getfield_a_this 12;		// reference storage/DataRepository.aesCipher
 					aload 5;
 					sconst_1;
-					getfield_a_this 2;		// reference storage/DataRepository.ivBuffer
+					getfield_a_this 13;		// reference storage/DataRepository.ivBuffer
 					sconst_0;
 					bspush 16;
-					invokevirtual 11;		// init(Ljavacard/security/Key;B[BSS)V
-					getfield_a_this 1;		// reference storage/DataRepository.aesCipher
-					getfield_a_this 0;		// reference storage/DataRepository.dataBlob
+					invokevirtual 22;		// init(Ljavacard/security/Key;B[BSS)V
+					getfield_a_this 12;		// reference storage/DataRepository.aesCipher
+					aload_1;
+					sconst_0;
+					aload_1;
+					arraylength;
+					aload_3;
+					sload 4;
+					invokevirtual 23;		// doFinal([BSS[BS)S
+					pop;
+					return;
+		}
+
+		.method public writeCardId([BSLjavacard/security/AESKey;)V 1 {
+			.stack 7;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 0;		// reference storage/DataRepository.cardId
+					sconst_1;
+					aload_1;
+					sload_2;
+					bspush 16;
+					aload_3;
+					invokespecial 29;		// storage/DataRepository.writeField([BS[BSSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public readCardId([BSLjavacard/security/AESKey;)V 2 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 0;		// reference storage/DataRepository.cardId
+					sconst_1;
+					aload_1;
+					sload_2;
+					aload_3;
+					invokespecial 30;		// storage/DataRepository.readField([BS[BSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public writeFullName([BSLjavacard/security/AESKey;)V 3 {
+			.stack 7;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 1;		// reference storage/DataRepository.fullName
+					sconst_2;
+					aload_1;
+					sload_2;
+					bspush 64;
+					aload_3;
+					invokespecial 29;		// storage/DataRepository.writeField([BS[BSSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public readFullName([BSLjavacard/security/AESKey;)V 4 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 1;		// reference storage/DataRepository.fullName
+					sconst_2;
+					aload_1;
+					sload_2;
+					aload_3;
+					invokespecial 30;		// storage/DataRepository.readField([BS[BSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public writeDob([BSLjavacard/security/AESKey;)V 5 {
+			.stack 7;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 2;		// reference storage/DataRepository.dob
+					sconst_3;
+					aload_1;
+					sload_2;
+					bspush 16;
+					aload_3;
+					invokespecial 29;		// storage/DataRepository.writeField([BS[BSSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public readDob([BSLjavacard/security/AESKey;)V 6 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 2;		// reference storage/DataRepository.dob
+					sconst_3;
+					aload_1;
+					sload_2;
+					aload_3;
+					invokespecial 30;		// storage/DataRepository.readField([BS[BSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public writePhone([BSLjavacard/security/AESKey;)V 7 {
+			.stack 7;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 3;		// reference storage/DataRepository.phone
+					sconst_4;
+					aload_1;
+					sload_2;
+					bspush 16;
+					aload_3;
+					invokespecial 29;		// storage/DataRepository.writeField([BS[BSSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public readPhone([BSLjavacard/security/AESKey;)V 8 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 3;		// reference storage/DataRepository.phone
+					sconst_4;
+					aload_1;
+					sload_2;
+					aload_3;
+					invokespecial 30;		// storage/DataRepository.readField([BS[BSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public writeAddress([BSLjavacard/security/AESKey;)V 9 {
+			.stack 7;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 4;		// reference storage/DataRepository.address
+					sconst_5;
+					aload_1;
+					sload_2;
+					bspush 64;
+					aload_3;
+					invokespecial 29;		// storage/DataRepository.writeField([BS[BSSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public readAddress([BSLjavacard/security/AESKey;)V 10 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 4;		// reference storage/DataRepository.address
+					sconst_5;
+					aload_1;
+					sload_2;
+					aload_3;
+					invokespecial 30;		// storage/DataRepository.readField([BS[BSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public writeRegDate([BSLjavacard/security/AESKey;)V 11 {
+			.stack 7;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 5;		// reference storage/DataRepository.regDate
+					bspush 6;
+					aload_1;
+					sload_2;
+					bspush 16;
+					aload_3;
+					invokespecial 29;		// storage/DataRepository.writeField([BS[BSSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public readRegDate([BSLjavacard/security/AESKey;)V 12 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 5;		// reference storage/DataRepository.regDate
+					bspush 6;
+					aload_1;
+					sload_2;
+					aload_3;
+					invokespecial 30;		// storage/DataRepository.readField([BS[BSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public writeBalance([BSLjavacard/security/AESKey;)V 13 {
+			.stack 7;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 7;		// reference storage/DataRepository.balance
+					bspush 8;
+					aload_1;
+					sload_2;
+					bspush 16;
+					aload_3;
+					invokespecial 29;		// storage/DataRepository.writeField([BS[BSSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public readBalance([BSLjavacard/security/AESKey;)V 14 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 7;		// reference storage/DataRepository.balance
+					bspush 8;
+					aload_1;
+					sload_2;
+					aload_3;
+					invokespecial 30;		// storage/DataRepository.readField([BS[BSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public writePoints([BSLjavacard/security/AESKey;)V 15 {
+			.stack 7;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 8;		// reference storage/DataRepository.points
+					bspush 9;
+					aload_1;
+					sload_2;
+					bspush 16;
+					aload_3;
+					invokespecial 29;		// storage/DataRepository.writeField([BS[BSSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public readPoints([BSLjavacard/security/AESKey;)V 16 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 8;		// reference storage/DataRepository.points
+					bspush 9;
+					aload_1;
+					sload_2;
+					aload_3;
+					invokespecial 30;		// storage/DataRepository.readField([BS[BSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public writeMemberType([BSLjavacard/security/AESKey;)V 17 {
+			.stack 7;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 9;		// reference storage/DataRepository.memberType
+					bspush 10;
+					aload_1;
+					sload_2;
+					bspush 16;
+					aload_3;
+					invokespecial 29;		// storage/DataRepository.writeField([BS[BSSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public readMemberType([BSLjavacard/security/AESKey;)V 18 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 9;		// reference storage/DataRepository.memberType
+					bspush 10;
+					aload_1;
+					sload_2;
+					aload_3;
+					invokespecial 30;		// storage/DataRepository.readField([BS[BSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public writeBorrowData([BSLjavacard/security/AESKey;)V 19 {
+			.stack 7;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 10;		// reference storage/DataRepository.borrowData
+					bspush 11;
+					aload_1;
+					sload_2;
+					sspush 240;
+					aload_3;
+					invokespecial 29;		// storage/DataRepository.writeField([BS[BSSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public readBorrowData([BSLjavacard/security/AESKey;)V 20 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	aload_0;
+					getfield_a_this 10;		// reference storage/DataRepository.borrowData
+					bspush 11;
+					aload_1;
+					sload_2;
+					aload_3;
+					invokespecial 30;		// storage/DataRepository.readField([BS[BSLjavacard/security/AESKey;)V
+					return;
+		}
+
+		.method public writeImageChunk(S[BSSLjavacard/security/AESKey;)V 21 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	sload_1;
+					sload 4;
+					sadd;
+					sspush 20480;
+					if_scmple L2;
+				L1:	sspush 20480;
+					sload_1;
+					ssub;
+					sstore 4;
+				L2:	aload_0;
+					bspush 12;
+					sload_1;
+					bspush 16;
+					sdiv;
+					sadd;
+					invokespecial 21;		// storage/DataRepository.generateIv(S)V
+					getfield_a_this 12;		// reference storage/DataRepository.aesCipher
+					aload 5;
+					sconst_2;
+					getfield_a_this 13;		// reference storage/DataRepository.ivBuffer
+					sconst_0;
+					bspush 16;
+					invokevirtual 22;		// init(Ljavacard/security/Key;B[BSS)V
+					getfield_a_this 12;		// reference storage/DataRepository.aesCipher
+					aload_2;
+					sload_3;
+					sload 4;
+					getfield_a_this 11;		// reference storage/DataRepository.image
+					sload_1;
+					invokevirtual 23;		// doFinal([BSS[BS)S
+					pop;
+					return;
+		}
+
+		.method public readImageChunk(SS[BSLjavacard/security/AESKey;)V 22 {
+			.stack 6;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/AESKey;	3.20;
+
+				L0:	sload_1;
+					sload_2;
+					sadd;
+					sspush 20480;
+					if_scmple L2;
+				L1:	sspush 20480;
+					sload_1;
+					ssub;
+					sstore_2;
+				L2:	aload_0;
+					bspush 12;
+					sload_1;
+					bspush 16;
+					sdiv;
+					sadd;
+					invokespecial 21;		// storage/DataRepository.generateIv(S)V
+					getfield_a_this 12;		// reference storage/DataRepository.aesCipher
+					aload 5;
+					sconst_1;
+					getfield_a_this 13;		// reference storage/DataRepository.ivBuffer
+					sconst_0;
+					bspush 16;
+					invokevirtual 22;		// init(Ljavacard/security/Key;B[BSS)V
+					getfield_a_this 12;		// reference storage/DataRepository.aesCipher
+					getfield_a_this 11;		// reference storage/DataRepository.image
 					sload_1;
 					sload_2;
 					aload_3;
 					sload 4;
-					invokevirtual 12;		// doFinal([BSS[BS)S
+					invokevirtual 23;		// doFinal([BSS[BS)S
+					pop;
+					return;
+		}
+
+		.method public writeAppPublicKey([BS)V 23 {
+			.stack 5;
+			.locals 0;
+
+				L0:	aload_1;
+					sload_2;
+					getfield_a_this 6;		// reference storage/DataRepository.appPublicKey
+					sconst_0;
+					sspush 128;
+					invokestatic 31;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					pop;
+					return;
+		}
+
+		.method public readAppPublicKey([BS)V 24 {
+			.stack 5;
+			.locals 0;
+
+				L0:	getfield_a_this 6;		// reference storage/DataRepository.appPublicKey
+					sconst_0;
+					aload_1;
+					sload_2;
+					sspush 128;
+					invokestatic 31;		// javacard/framework/Util.arrayCopy([BS[BSS)S
 					pop;
 					return;
 		}

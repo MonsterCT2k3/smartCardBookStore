@@ -86,7 +86,7 @@ public class MainApplet extends Applet implements ExtendedLength {
                 secManager.verifyPin(buffer, ISO7816.OFFSET_CDATA, dataLen);
                 break;
 
-            // --- NHOM 3: NGHIEP VU (CO MA HOA HYBRID) ---
+            // --- NHOM 3: NGHIEP VU
 
             case Constants.INS_GET_INFO:
                 handleGetInfoSecure(apdu);
@@ -218,43 +218,43 @@ public class MainApplet extends Applet implements ExtendedLength {
         AESKey mk = secManager.getMasterKey();
         short readOff = 0;
 
-        repository.write(Constants.OFF_CARD_ID, tempBufferRam, readOff, Constants.LEN_CARD_ID, mk);
+        repository.writeCardId(tempBufferRam, readOff, mk);
         readOff += Constants.LEN_CARD_ID;
 
-        repository.write(Constants.OFF_FULLNAME, tempBufferRam, readOff, Constants.LEN_FULLNAME, mk);
+        repository.writeFullName(tempBufferRam, readOff, mk);
         readOff += Constants.LEN_FULLNAME;
 
-        repository.write(Constants.OFF_DOB, tempBufferRam, readOff, Constants.LEN_DOB, mk);
+        repository.writeDob(tempBufferRam, readOff, mk);
         readOff += Constants.LEN_DOB;
 
-        repository.write(Constants.OFF_PHONE, tempBufferRam, readOff, Constants.LEN_PHONE, mk);
+        repository.writePhone(tempBufferRam, readOff, mk);
         readOff += Constants.LEN_PHONE;
 
-        repository.write(Constants.OFF_ADDRESS, tempBufferRam, readOff, Constants.LEN_ADDRESS, mk);
+        repository.writeAddress(tempBufferRam, readOff, mk);
         readOff += Constants.LEN_ADDRESS;
 
-        repository.write(Constants.OFF_REG_DATE, tempBufferRam, readOff, Constants.LEN_REG_DATE, mk);
+        repository.writeRegDate(tempBufferRam, readOff, mk);
         readOff += Constants.LEN_REG_DATE;
 
-        repository.write(Constants.OFF_APP_PUBLIC_KEY, tempBufferRam, readOff, Constants.LEN_APP_PUBLIC_KEY, mk);
+        repository.writeAppPublicKey(tempBufferRam, readOff);
 
         // --- INIT BALANCE = 0 ---
         Util.arrayFillNonAtomic(tempBufferRam, (short) 0, Constants.LEN_BALANCE, (byte) 0);
-        repository.write(Constants.OFF_BALANCE, tempBufferRam, (short) 0, Constants.LEN_BALANCE, mk);
+        repository.writeBalance(tempBufferRam, (short) 0, mk);
 
         // --- INIT POINTS = 0 ---
         // tempBufferRam van dang la 0
-        repository.write(Constants.OFF_POINTS, tempBufferRam, (short) 0, Constants.LEN_POINTS, mk);
+        repository.writePoints(tempBufferRam, (short) 0, mk);
 
         // --- INIT MEMBER TYPE = 0 ---
         // Van dung tempBufferRam dang chua toan 0
-        repository.write(Constants.OFF_MEMBER_TYPE, tempBufferRam, (short) 0, Constants.LEN_MEMBER_TYPE, mk);
+        repository.writeMemberType(tempBufferRam, (short) 0, mk);
 
         // --- INIT BORROW DATA (240 bytes = 0) ---
         // tempBufferRam (512 bytes) dang chua toan 0 (do da fill o tren hoac mac dinh)
         // De chac chan, ta fill lai 240 bytes
         Util.arrayFillNonAtomic(tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, (byte) 0);
-        repository.write(Constants.OFF_BORROW_DATA, tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, mk);
+        repository.writeBorrowData(tempBufferRam, (short) 0, mk);
 
         // --- NEW: SET FIRST LOGIN FLAG ---
         secManager.setFirstLogin(true);
@@ -286,19 +286,19 @@ public class MainApplet extends Applet implements ExtendedLength {
         short readOff = 0;
 
         // 1. Update Name
-        repository.write(Constants.OFF_FULLNAME, tempBufferRam, readOff, Constants.LEN_FULLNAME, mk);
+        repository.writeFullName(tempBufferRam, readOff, mk);
         readOff += Constants.LEN_FULLNAME;
 
         // 2. Update DOB
-        repository.write(Constants.OFF_DOB, tempBufferRam, readOff, Constants.LEN_DOB, mk);
+        repository.writeDob(tempBufferRam, readOff, mk);
         readOff += Constants.LEN_DOB;
 
         // 3. Update Phone
-        repository.write(Constants.OFF_PHONE, tempBufferRam, readOff, Constants.LEN_PHONE, mk);
+        repository.writePhone(tempBufferRam, readOff, mk);
         readOff += Constants.LEN_PHONE;
 
         // 4. Update Address
-        repository.write(Constants.OFF_ADDRESS, tempBufferRam, readOff, Constants.LEN_ADDRESS, mk);
+        repository.writeAddress(tempBufferRam, readOff, mk);
         readOff += Constants.LEN_ADDRESS;
     }
 
@@ -309,7 +309,7 @@ public class MainApplet extends Applet implements ExtendedLength {
         apdu.setOutgoing();
         apdu.setOutgoingLength(Constants.LEN_CARD_ID);
 
-        repository.read(Constants.OFF_CARD_ID, Constants.LEN_CARD_ID, buffer, (short) 0, mk);
+        repository.readCardId(buffer, (short) 0, mk);
 
         apdu.sendBytes((short) 0, Constants.LEN_CARD_ID);
     }
@@ -338,26 +338,26 @@ public class MainApplet extends Applet implements ExtendedLength {
 
         short plainOff = 0;
 
-        repository.read(Constants.OFF_CARD_ID, Constants.LEN_CARD_ID, buffer, plainOff, mk);
+        repository.readCardId(buffer, plainOff, mk);
         plainOff += Constants.LEN_CARD_ID;
 
-        repository.read(Constants.OFF_FULLNAME, Constants.LEN_FULLNAME, buffer, plainOff, mk);
+        repository.readFullName(buffer, plainOff, mk);
         plainOff += Constants.LEN_FULLNAME;
 
-        repository.read(Constants.OFF_DOB, Constants.LEN_DOB, buffer, plainOff, mk);
+        repository.readDob(buffer, plainOff, mk);
         plainOff += Constants.LEN_DOB;
 
-        repository.read(Constants.OFF_PHONE, Constants.LEN_PHONE, buffer, plainOff, mk);
+        repository.readPhone(buffer, plainOff, mk);
         plainOff += Constants.LEN_PHONE;
 
-        repository.read(Constants.OFF_ADDRESS, Constants.LEN_ADDRESS, buffer, plainOff, mk);
+        repository.readAddress(buffer, plainOff, mk);
         plainOff += Constants.LEN_ADDRESS;
 
-        repository.read(Constants.OFF_REG_DATE, Constants.LEN_REG_DATE, buffer, plainOff, mk);
+        repository.readRegDate(buffer, plainOff, mk);
 
         // --- READ MEMBER TYPE ---
         // Doc 16 bytes vao tempBufferRam (de decrypt dung block)
-        repository.read(Constants.OFF_MEMBER_TYPE, Constants.LEN_MEMBER_TYPE, tempBufferRam, (short) 0, mk);
+        repository.readMemberType(tempBufferRam, (short) 0, mk);
         // Copy 1 byte dau tien vao buffer output
         buffer[(short) 192] = tempBufferRam[0];
 
@@ -374,13 +374,13 @@ public class MainApplet extends Applet implements ExtendedLength {
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
         // 2. Doc Points hien tai -> tempBufferRam
-        repository.read(Constants.OFF_POINTS, Constants.LEN_POINTS, tempBufferRam, (short) 0, mk);
+        repository.readPoints(tempBufferRam, (short) 0, mk);
 
         // 3. Cong diem: tempBufferRam + buffer
         addBigNumber(tempBufferRam, (short) 0, buffer, apdu.getOffsetCdata(), (short) 4);
 
         // 4. Ghi lai
-        repository.write(Constants.OFF_POINTS, tempBufferRam, (short) 0, Constants.LEN_POINTS, mk);
+        repository.writePoints(tempBufferRam, (short) 0, mk);
     }
 
     private void handleUsePoint(APDU apdu) {
@@ -393,7 +393,7 @@ public class MainApplet extends Applet implements ExtendedLength {
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
         // 2. Doc Points hien tai -> tempBufferRam
-        repository.read(Constants.OFF_POINTS, Constants.LEN_POINTS, tempBufferRam, (short) 0, mk);
+        repository.readPoints(tempBufferRam, (short) 0, mk);
 
         // 3. Kiem tra du diem khong? (Current >= Amount?)
         byte cmp = compareBigNumber(tempBufferRam, (short) 0, buffer, apdu.getOffsetCdata(), (short) 4);
@@ -406,7 +406,7 @@ public class MainApplet extends Applet implements ExtendedLength {
         subtractBigNumber(tempBufferRam, (short) 0, buffer, apdu.getOffsetCdata(), (short) 4);
 
         // 5. Ghi lai
-        repository.write(Constants.OFF_POINTS, tempBufferRam, (short) 0, Constants.LEN_POINTS, mk);
+        repository.writePoints(tempBufferRam, (short) 0, mk);
     }
 
     private void handleUpgradeMember(APDU apdu, byte newType) {
@@ -417,7 +417,7 @@ public class MainApplet extends Applet implements ExtendedLength {
         tempBufferRam[0] = newType;
 
         // Ghi vao EEPROM
-        repository.write(Constants.OFF_MEMBER_TYPE, tempBufferRam, (short) 0, Constants.LEN_MEMBER_TYPE, mk);
+        repository.writeMemberType(tempBufferRam, (short) 0, mk);
     }
 
     // --- BORROW BOOK HANDLERS ---
@@ -432,7 +432,7 @@ public class MainApplet extends Applet implements ExtendedLength {
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
         // 2. Doc toan bo Borrow Data (240 bytes) vao RAM
-        repository.read(Constants.OFF_BORROW_DATA, Constants.LEN_BORROW_DATA, tempBufferRam, (short) 0, mk);
+        repository.readBorrowData(tempBufferRam, (short) 0, mk);
 
         // 3. Tim slot trong va Kiem tra trung ID
         short freeSlotOffset = -1;
@@ -474,7 +474,7 @@ public class MainApplet extends Applet implements ExtendedLength {
         Util.arrayCopy(buffer, inputIdOffset, tempBufferRam, freeSlotOffset, (short) 16);
 
         // 5. Ghi nguoc RAM xuong EEPROM
-        repository.write(Constants.OFF_BORROW_DATA, tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, mk);
+        repository.writeBorrowData(tempBufferRam, (short) 0, mk);
     }
 
     private void handleReturnBook(APDU apdu) {
@@ -489,7 +489,7 @@ public class MainApplet extends Applet implements ExtendedLength {
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
         // 2. Doc data vao RAM
-        repository.read(Constants.OFF_BORROW_DATA, Constants.LEN_BORROW_DATA, tempBufferRam, (short) 0, mk);
+        repository.readBorrowData(tempBufferRam, (short) 0, mk);
 
         // 3. Tim sach can tra
         short targetOffset = -1;
@@ -514,7 +514,7 @@ public class MainApplet extends Applet implements ExtendedLength {
         Util.arrayFillNonAtomic(tempBufferRam, targetOffset, slotSize, (byte) 0);
 
         // 5. Update EEPROM
-        repository.write(Constants.OFF_BORROW_DATA, tempBufferRam, (short) 0, Constants.LEN_BORROW_DATA, mk);
+        repository.writeBorrowData(tempBufferRam, (short) 0, mk);
     }
 
     private void handleGetBorrowedBooks(APDU apdu) {
@@ -525,7 +525,7 @@ public class MainApplet extends Applet implements ExtendedLength {
         apdu.setOutgoingLength(Constants.LEN_BORROW_DATA); // 240 bytes
 
         // Doc data vao buffer
-        repository.read(Constants.OFF_BORROW_DATA, Constants.LEN_BORROW_DATA, buffer, (short) 0, mk);
+        repository.readBorrowData(buffer, (short) 0, mk);
 
         // Gui ve client
         apdu.sendBytes((short) 0, Constants.LEN_BORROW_DATA);
@@ -551,8 +551,7 @@ public class MainApplet extends Applet implements ExtendedLength {
             // While we have enough data for a full chunk
             while (ramOffset >= CHUNK_SIZE) {
                 // Write exactly CHUNK_SIZE to EEPROM
-                repository.write((short) (Constants.OFF_IMAGE + currentImageOffset),
-                        tempBufferRam, (short) 0, CHUNK_SIZE, mk);
+                repository.writeImageChunk(currentImageOffset, tempBufferRam, (short) 0, CHUNK_SIZE, mk);
                 currentImageOffset += CHUNK_SIZE;
 
                 // Shift remaining data to start of buffer
@@ -576,8 +575,7 @@ public class MainApplet extends Applet implements ExtendedLength {
 
         // Write remaining data (if any)
         if (ramOffset > 0) {
-            repository.write((short) (Constants.OFF_IMAGE + currentImageOffset),
-                    tempBufferRam, (short) 0, ramOffset, mk);
+            repository.writeImageChunk(currentImageOffset, tempBufferRam, (short) 0, ramOffset, mk);
         }
     }
 
@@ -606,7 +604,7 @@ public class MainApplet extends Applet implements ExtendedLength {
         apdu.setOutgoingLength(len);
 
         // Doc chunk tu EEPROM
-        repository.read((short) (Constants.OFF_IMAGE + offset), len, buffer, (short) 0, mk);
+        repository.readImageChunk(offset, len, buffer, (short) 0, mk);
 
         // Gui chunk
         apdu.sendBytes((short) 0, len);
@@ -623,11 +621,11 @@ public class MainApplet extends Applet implements ExtendedLength {
         apdu.setOutgoingLength((short) 8); // Client can 4 bytes Balance + 4 bytes Points
 
         // 1. Doc Balance (16 bytes) -> buffer[0..3]
-        repository.read(Constants.OFF_BALANCE, Constants.LEN_BALANCE, tempBufferRam, (short) 0, mk);
+        repository.readBalance(tempBufferRam, (short) 0, mk);
         Util.arrayCopy(tempBufferRam, (short) 0, buffer, (short) 0, (short) 4);
 
         // 2. Doc Points (16 bytes) -> buffer[4..7]
-        repository.read(Constants.OFF_POINTS, Constants.LEN_POINTS, tempBufferRam, (short) 0, mk);
+        repository.readPoints(tempBufferRam, (short) 0, mk);
         Util.arrayCopy(tempBufferRam, (short) 0, buffer, (short) 4, (short) 4);
 
         // Gui 8 bytes
@@ -644,13 +642,13 @@ public class MainApplet extends Applet implements ExtendedLength {
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
         // 2. Doc so du hien tai -> tempBufferRam[0..3]
-        repository.read(Constants.OFF_BALANCE, Constants.LEN_BALANCE, tempBufferRam, (short) 0, mk);
+        repository.readBalance(tempBufferRam, (short) 0, mk);
 
         // 3. Cong tien
         addBigNumber(tempBufferRam, (short) 0, buffer, apdu.getOffsetCdata(), (short) 4);
 
         // 4. Ghi lai so du moi (NO TRANSACTION - Repository tu lo)
-        repository.write(Constants.OFF_BALANCE, tempBufferRam, (short) 0, Constants.LEN_BALANCE, mk);
+        repository.writeBalance(tempBufferRam, (short) 0, mk);
     }
 
     private void handlePayment(APDU apdu) {
@@ -663,7 +661,7 @@ public class MainApplet extends Applet implements ExtendedLength {
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
         // 2. Doc so du hien tai -> tempBufferRam[0..3]
-        repository.read(Constants.OFF_BALANCE, Constants.LEN_BALANCE, tempBufferRam, (short) 0, mk);
+        repository.readBalance(tempBufferRam, (short) 0, mk);
 
         // 3. Kiem tra so du (Current >= Payment?)
         byte cmp = compareBigNumber(tempBufferRam, (short) 0, buffer, apdu.getOffsetCdata(), (short) 4);
@@ -676,7 +674,7 @@ public class MainApplet extends Applet implements ExtendedLength {
         subtractBigNumber(tempBufferRam, (short) 0, buffer, apdu.getOffsetCdata(), (short) 4);
 
         // 5. Ghi lai
-        repository.write(Constants.OFF_BALANCE, tempBufferRam, (short) 0, Constants.LEN_BALANCE, mk);
+        repository.writeBalance(tempBufferRam, (short) 0, mk);
     }
 
     // --- BIG NUMBER HELPERS (4 Bytes / Generic) ---
